@@ -1,0 +1,1 @@
+![./BMPfileFormat.svg](./BMPfileFormat.svg)

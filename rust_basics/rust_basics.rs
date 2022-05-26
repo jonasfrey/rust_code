@@ -206,6 +206,13 @@ fn f_datatypes(){
     
 }
 
+fn f_bitwise_operators(){
+        
+    let n_test = 0b011101010101; 
+    
+    println!("{:#b}", n_test>>8); 
+    
+}
 
 fn f_variables(){
 
