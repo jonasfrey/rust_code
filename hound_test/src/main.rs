@@ -64,14 +64,14 @@ fn make_wav(nsamples: usize) -> Vec<u8> {
 fn main() {
     let mut a_s_argument = vec![];
 
-    for n_i in 0..20{
+    for n_i in 0..1{
 
         let s_filename = str::replace("sine{}.wav", "{}", &(n_i).to_string());
 
         a_s_argument.push(s_filename.to_string());
 
         let mut file = File::create(s_filename).unwrap();
-        let sin_buf = make_sin(100, ((n_i as f32)*111.0).into());
+        let sin_buf = make_sin(100, (432.0+(n_i as f32)*11.0).into());
         let wav_buf = make_wav(sin_buf.len());
         file.write_all(&wav_buf).unwrap();
         file.write_all(&sin_buf).unwrap();
