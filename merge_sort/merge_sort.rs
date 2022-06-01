@@ -4,12 +4,14 @@ extern crate image;
 
 // use std::time::Instant;
 use std::time::{SystemTime, UNIX_EPOCH};
-
+use std::fs;
 use image::{ImageBuffer, RgbImage};
 
 const N_IMG_WIDTH: u32 = 512;
 const N_IMG_HEIGTH: u32 = 512;
 
+
+    
 // This is the main function
 fn f_a_n_randnum(
     n_length_a_n_randnum: u32
@@ -44,7 +46,8 @@ fn f_a_n_randnum(
 }
 
 fn f_draw_image(
-    a_n_numbers: Vec<u8>
+    a_n_numbers: Vec<u8>,
+    s_folder_path_name: &str
 ){
 
     let mut image: RgbImage = ImageBuffer::new(N_IMG_WIDTH, N_IMG_HEIGTH);
@@ -95,11 +98,20 @@ fn f_draw_image(
 
     let n_ts_ms = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
 
+    
+    let mut owned_string: String = "".to_owned();
+    let mut s_file_name = str::replace("output_image_{}.png", "{}", &(n_ts_ms).to_string());
+    let borrowed_string = s_folder_path_name; 
+    owned_string.push_str(&borrowed_string);
+    fs::create_dir_all(s_folder_path_name);
+
+    owned_string.push_str(&s_file_name);
+
     // write it out to a file
     // let n_ts_ms = Instant::now().elapsed().as_millis();
-    image.save(str::replace("output_image_{}.png", "{}", &(n_ts_ms).to_string()) ).unwrap();
+    image.save(owned_string).unwrap();
 
-    ffmpeg -framerate 25 -pattern_type glob -i '*.png' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
+    // ffmpeg -framerate 25 -pattern_type glob -i '*.png' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
 
 
 }
@@ -107,6 +119,10 @@ fn f_a_selectionsort(
     // a_n_numbers_original: Vec<u8>
     a_n_numbers: &mut Vec<u8>
 ){
+    let n_ts_ms = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
+
+    let s_folder_path_name = str::replace("./selectionsort_images_{}/", "{}", &(n_ts_ms).to_string());
+
     let mut n_index = 0; 
     let mut n_value =0; 
     while n_index < a_n_numbers.len(){
@@ -131,23 +147,119 @@ fn f_a_selectionsort(
         a_n_numbers[n_min_index] = n_tmp;
         
         // f_draw_image((&mut a_n_numbers).to_vec());
-        f_draw_image(a_n_numbers.to_vec());
+        f_draw_image(a_n_numbers.to_vec(), &s_folder_path_name);
 
         n_index = n_index + 1; 
     }
     // return a_n_numbers;
 }
-fn f_a_insertsort(){
+fn f_a_insertsort(
+    a_n_numbers: &mut Vec<u8>
+){
+
+    let n_ts_ms = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
+
+    let s_folder_path_name = str::replace("./insertsort_images{}/", "{}", &(n_ts_ms).to_string());
+
+
+    let mut n_index = 1; 
+
+    while n_index < a_n_numbers.len(){
+        
+        let n_to_insert = a_n_numbers[n_index]; //1
+        println!("n_to_insert: {:?}", n_to_insert);
+
+        let mut n_i = 0; 
+        while n_i < n_index{
+            println!("{:?} <? {:?} ", n_to_insert,a_n_numbers[n_i]);
+
+            if(n_to_insert < a_n_numbers[n_i]){
+                
+                let mut n_index_reverse = n_index; 
+
+                while n_index_reverse > n_i{
+
+                    a_n_numbers[n_index_reverse] = a_n_numbers[n_index_reverse-1];
+
+                    n_index_reverse = n_index_reverse -1;
+                }
+                println!("shifted: {:?}", a_n_numbers);
+
+
+                a_n_numbers[n_i] = n_to_insert;
+                println!("inserted: {:?}", a_n_numbers);
+                break;
+            } 
+            n_i+=1;
+        }
+
+        f_draw_image(a_n_numbers.to_vec(), &s_folder_path_name);
+
+        n_index = n_index +1;
+    }
 
 }
 
+fn f_bubblesort(
+    a_n_numbers: &mut Vec<u8>
+){
+
+    let n_ts_ms = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis();
+    let s_folder_path_name = str::replace("./bubblesort_images{}/", "{}", &(n_ts_ms).to_string());
+    
+    let mut b_fullysorted = false; 
+    while !b_fullysorted{
+        // bubble phase 
+        b_fullysorted = true;
+        let mut n_index = 0; 
+        
+        while n_index < (a_n_numbers.len()-1){
+        
+            if(a_n_numbers[n_index+1] < a_n_numbers[n_index]){
+                let n_tmp = a_n_numbers[n_index+1]; 
+                println!("{:?}<-swap->{:?}", a_n_numbers[n_index], a_n_numbers[n_index+1]);
+                a_n_numbers[n_index+1] = a_n_numbers[n_index];
+                a_n_numbers[n_index] = n_tmp;
+                b_fullysorted = false;
+            }
+
+            n_index +=1;
+            f_draw_image(a_n_numbers.to_vec(), &s_folder_path_name);
+
+        }
+    }
+
+}
+
+
+fn f_quicksort(
+    a_n_numbers: &mut Vec<u8>
+){
+
+        
+}
 fn main() {
 
-    let mut a_n_randnum = f_a_n_randnum(10);
+    let mut a_n_randnum = f_a_n_randnum(200);
     println!("{:?}", a_n_randnum);
 
-    f_a_selectionsort(&mut a_n_randnum);
-    println!("{:?}", a_n_randnum);
+    // f_a_selectionsort(&mut a_n_randnum);
+    // println!("{:?}", a_n_randnum);
+
+    // let mut a_n_static : Vec<u8> = vec![5,9,1,4,6,23,24,25,26,27];
+
+    // let mut a_n_unordered = a_n_static
+    let mut a_n_unordered = a_n_randnum;
+
+    // f_a_insertsort(&mut a_n_unordered);
+    // println!("{:?}", a_n_unordered);
+
+    // f_bubblesort(&mut a_n_unordered);
+    // println!("{:?}", a_n_unordered);
+
+
+    f_a_selectionsort(&mut a_n_unordered);
+    println!("{:?}", a_n_unordered);
 
     // f_a_selectionsort(&mut a_n_randnum); 
     // println!("{:?}", a_n_randnum);
