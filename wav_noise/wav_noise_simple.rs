@@ -29,62 +29,6 @@ fn f_a_convert_u16_to_2_u8_values(n_u16:u16) -> [u8;2]{
     return a_array; 
 }
 
-fn f_add_samples_milliseconds_of_freq_sinewave(
-    n_milliseconds: u32, 
-    n_freq: u32,
-    a_array: &mut Vec<u8>,
-    n_samples_per_second_aka_samplerate: u32, 
-    n_bits_per_sample: u32
-){
-
-    // let n_index_of_data_mark = a_array.iter().position(|&r| r == "data").unwrap();
-    let mut n_i = 0;
-    let mut n_index_of_data_mark = 0;
-    while n_i < a_array.len(){
-        if
-            a_array[n_i+0] == b'd'
-            &&
-            a_array[n_i+1] == b'a'
-            &&
-            a_array[n_i+2] == b't'
-            &&
-            a_array[n_i+3] == b'a'
-        {
-            n_index_of_data_mark = n_i;
-            break;
-        }
-        n_i = n_i+1;
-    }
-
-    println!("n_index_of_data_mark: {}", n_index_of_data_mark);
-
-    let n_samples_to_add = ((n_samples_per_second_aka_samplerate as f32) / 1000.0 * (n_milliseconds as f32))as u32;
-    let mut n_count_sample = 0;
-
-    let mut n_radians_start: f32 = 3.14159;
-    let n_freq_float = n_freq as f32 / 2000.0_f32;
-
-    while n_count_sample < n_samples_to_add {
-
-        // let n_rand_f32: f32 = rng.gen();
-        // let n_rand_u16: u16 = rng.gen();
-
-        // let n_u16: u16 = ((n_i*10) as u16) % (2_u16.pow(16)-1);
-        // let n_u16: u16 = (((n_i as f32) * n_sawtooth_freq) as u16) % u16::MAX;
-        n_radians_start = n_radians_start + n_freq_float;
-
-        let n_u16 = (((n_radians_start.sin() * (u16::MAX) as f32) + ((u16::MAX as f32)/2.0))) as u16;
-        // let n_u16 = n_rand_u16;
-        let a_n_u16 = f_a_convert_u16_to_2_u8_values(n_u16);
-        a_array.push(a_n_u16[0+0]);
-        a_array.push(a_n_u16[0+1]);
-
-        n_count_sample = n_count_sample + 1; 
-    }
-
-
-}
-
 fn f_a_convert_u32_to_4_u8_values(n_u32: u32) -> [u8;4]{
 // input:   0b1010 1010       0000 1111       0011 0011       0101 1111  // one number
 // output: [0b1010 1010,    0b0000 1111,    0b0011 0011,    0b0101 1111] // array of integers
@@ -123,7 +67,7 @@ fn main() -> std::io::Result<()> {
         // println!("{}", n_i);
 
     let n_ts_milsec =SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis(); 
-    let s_filename = str::replace("output_wav_noise{n_ts_milsec}.wav", "{n_ts_milsec}", &n_ts_milsec.to_string());
+    let s_filename = str::replace("wav_noise{n_ts_milsec}.wav", "{n_ts_milsec}", &n_ts_milsec.to_string());
     // let s_filename = "bitmap_image_"..".bmp";
     {
         
@@ -133,6 +77,7 @@ fn main() -> std::io::Result<()> {
         // let mut a_array = vec![0;     0];
 
         let s_riff_mark = [b'R', b'I', b'F', b'F'];  // ChunkID; "RIFF"
+        let n_file_size_bytes: u32 = 50000; // used at the end //ChunkSize
         let s_wave_mark = [b'W',b'A',b'V',b'E']; // Format "WAVE"
 
         let s_fmt_mark = [b'f',b'm',b't', b' ']; // Subchunk1ID "fmt "
@@ -148,10 +93,10 @@ fn main() -> std::io::Result<()> {
         let n_block_align: u32 = n_num_channels * (n_bits_per_sample / 8);
         let s_data_mark = [b'd',b'a',b't',b'a'];// "data"
         let n_header_end_index: u32 = 44;
+        let n_data_size_bytes: u32 = n_file_size_bytes - n_header_end_index;
 
 
-        let n_filesize_min = n_header_end_index;
-        let mut a_array = vec![0; n_filesize_min as usize];
+        let mut a_array = vec![0; n_file_size_bytes as usize];
         // let mut a_array: [u8; n_file_size_bytes] = [0; 3];
         
 
@@ -161,7 +106,12 @@ fn main() -> std::io::Result<()> {
         a_array[1] = s_riff_mark[1];
         a_array[2] = s_riff_mark[2];
         a_array[3] = s_riff_mark[3];
-
+        // ChunkSize
+        let a_n_file_size_bytes = f_a_convert_u32_to_4_u8_values(n_file_size_bytes); 
+        a_array[4] = a_n_file_size_bytes[3]; // little endian
+        a_array[5] = a_n_file_size_bytes[2];
+        a_array[6] = a_n_file_size_bytes[1];
+        a_array[7] = a_n_file_size_bytes[0];
 
         //Format
         a_array[8] = s_wave_mark[0]; //big endian
@@ -221,28 +171,7 @@ fn main() -> std::io::Result<()> {
         a_array[37] = s_data_mark[1];
         a_array[38] = s_data_mark[2];
         a_array[39] = s_data_mark[3];
-        
-        // let n_i = 0; 
-        for n in 0..100{
-            f_add_samples_milliseconds_of_freq_sinewave(
-                40,
-                n*20, 
-                &mut a_array, 
-                n_samples_per_second_aka_samplerate, 
-                n_bits_per_sample
-            );
-        }
-        // let a_slice = &a_array[0..(n_index) as usize];
 
-        let n_file_size_bytes: u32 = a_array.len() as u32; // used at the end //ChunkSize
-        // ChunkSize
-        let a_n_file_size_bytes = f_a_convert_u32_to_4_u8_values(n_file_size_bytes); 
-        a_array[4] = a_n_file_size_bytes[3]; // little endian
-        a_array[5] = a_n_file_size_bytes[2];
-        a_array[6] = a_n_file_size_bytes[1];
-        a_array[7] = a_n_file_size_bytes[0];
-
-        let n_data_size_bytes: u32 = n_file_size_bytes - n_header_end_index;
         // file size
         let a_n_data_size_bytes = f_a_convert_u32_to_4_u8_values(n_data_size_bytes); 
 
@@ -250,6 +179,30 @@ fn main() -> std::io::Result<()> {
         a_array[41] = a_n_data_size_bytes[2];
         a_array[42] = a_n_data_size_bytes[1];
         a_array[43] = a_n_data_size_bytes[0];
+
+        // n_header_end_index // is 44
+        println!("{}", n_header_end_index);
+        println!("{}", n_file_size_bytes);
+        let mut rng = rand::thread_rng();
+        let mut n_i = n_header_end_index;
+        let n_sawtooth_freq = 1.2; 
+        
+        while n_i < n_file_size_bytes - 10 {
+
+            // let n_rand_f32: f32 = rng.gen();
+            // let n_rand_u16: u16 = rng.gen();
+
+            // let n_u16: u16 = ((n_i*10) as u16) % (2_u16.pow(16)-1);
+            let n_u16: u16 = (((n_i as f32) * n_sawtooth_freq) as u16) % u16::MAX;
+            // let n_u16 = n_rand_u16;
+            let a_n_rand_u16 = f_a_convert_u16_to_2_u8_values(n_u16);
+            a_array[(n_i+0) as usize] = a_n_rand_u16[0+0];
+            a_array[(n_i+1) as usize] = a_n_rand_u16[0+1];
+
+            n_i = n_i + 2; 
+        }
+
+        // let a_slice = &a_array[0..(n_index) as usize];
 
         file.write_all(
             &a_array
