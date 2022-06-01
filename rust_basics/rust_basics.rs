@@ -1,4 +1,6 @@
 
+use std::fs::File;
+use std::io::Write; 
 fn f_macros(){
     //check below     
 }
@@ -63,6 +65,9 @@ macro_rules! f_create_function_by_identifier_and_expression {
 // This is the main function
 fn main() {
 
+    let n = f_return_without_return();
+    println!("{:?}", n);
+
     f_can_this_be_used_in_main_although_it_was_declared_below_the_main_fn();
 
     f_variables();
@@ -98,6 +103,11 @@ fn main() {
     f_type_casting();
     // f_address_and_value_aka_index_and_value();
     // f_datatypes();
+
+    f_struct();
+
+
+    f_save_struct_array_as_file();
 
     
 }
@@ -243,4 +253,155 @@ fn f_variables(){
 fn f_can_this_be_used_in_main_although_it_was_declared_below_the_main_fn(){
     // yes functions can be declared after they are called!
     println!("if you see f_can_this_be_used_in_main_although_it_was_declared_below_the_main_fn, then yes")
+}
+
+
+
+// struct definition
+struct O_test{
+    b_test : bool, 
+    n_test : u8, 
+    s_test : String
+}
+
+#[derive(Debug)]
+struct O_test_derived_from_debug{
+    b_test : bool, 
+    n_test : u8, 
+    s_test : String
+}
+
+
+fn f_struct(){
+
+    // create a new "instance" of the struct
+    let o_test1 = O_test{
+        b_test: true,
+        n_test: 128u8, 
+        s_test: String::from("this is a test string yeey")
+    };
+
+    // access a property / attribute / "member?"
+    println!("{:?}", o_test1.b_test); 
+
+
+    // changing a prop  only possible if the entire struct is mut
+    let mut o_test_mut = O_test{
+        b_test: true, 
+        n_test: 123u8,
+        s_test: String::from("asdf")
+    };
+    println!("{:?}", o_test_mut.s_test); 
+
+    o_test_mut.s_test = String::from("new string is assigned as value");
+
+    println!("{:?}", o_test_mut.s_test); 
+    // println!("{:?}", o_test_mut); //this wont work , we need to add '#[derive(Debug)]' one line before the start of the struct definition 'struct O_structname'  
+
+
+    let mut o_test_from_fun = f_o_test();
+    println!("{:?}", o_test_from_fun.s_test);
+    // can we modify it ? 
+    o_test_from_fun.s_test = String::from("this struct came from a function and a property on it was changed in another scope!!! huray");
+    
+    println!("{:?}", o_test_from_fun.s_test);
+
+    // can we modify it in another scope ? 
+    f_modify_struct(o_test_from_fun); 
+    
+    // 
+    let mut o_test_derived_from_debug = O_test_derived_from_debug{
+        b_test: true, 
+        n_test: 123u8,
+        s_test: String::from("asdf")
+    };
+    println!("{:?}", o_test_derived_from_debug);
+
+
+
+    
+}
+
+fn f_modify_struct(
+    mut o_test: O_test // we need the 'mut' keyword
+){
+    o_test.s_test = String::from("the string was modified in the function f_modify_struct"); 
+    println!("{:?}", o_test.s_test);
+}
+
+fn f_o_test() 
+    -> O_test
+{   
+    // return O_test{
+    O_test{ // wtf we do not need to have a 'return' expression to return the struct ?!?!?!?!?
+        b_test: true, 
+        n_test: 23u8, 
+        s_test: String::from("this struct was created in the function f_o_test")
+    }
+    // this 
+}
+
+// fn f_n_withoutreturn() -> u8 {
+//     10u8;
+// }
+
+// fn f_return_without_return(){ //function definition needs a return type
+fn f_return_without_return() -> u8{
+    // the last statement in a scope will return from the function, but only if there is no semicolon ";"!!!
+    (10+11)
+}
+
+struct O_foo{
+    n_num: u8
+}
+
+fn f_o_foo() -> O_foo
+{
+    O_foo{
+        n_num:12
+    }
+}
+
+fn f_n_test() -> u8 {
+    42u8
+}
+
+struct O_txtfile{
+    a_bytes: Vec<u8>
+}
+fn f_o_txtfile() -> O_txtfile{
+    let mut a_bytes = vec![];
+
+    let mut o_txtfile = O_txtfile{ a_bytes : a_bytes};
+    o_txtfile.a_bytes.push(65);
+    o_txtfile.a_bytes.push(66);
+    o_txtfile.a_bytes.push(67);
+    o_txtfile.a_bytes.push(68);
+    o_txtfile.a_bytes.push(69);
+    return o_txtfile;
+}
+fn f_modify_o_txtfile_by_address(
+    o_txtfile: &mut O_txtfile
+){
+    o_txtfile.a_bytes[0] = 70;
+    o_txtfile.a_bytes[1] = 71;
+}
+fn f_modify_o_txtfile_by_borrowing(
+    mut o_txtfile: O_txtfile
+)-> O_txtfile{
+    o_txtfile.a_bytes[2] = 80;
+    o_txtfile.a_bytes[3] = 81;
+    return o_txtfile;
+}
+fn f_save_struct_array_as_file(){
+
+    let mut o_txtfile = f_o_txtfile();
+    f_modify_o_txtfile_by_address(&mut o_txtfile);
+    o_txtfile = f_modify_o_txtfile_by_borrowing(o_txtfile);
+
+    let mut file = File::create("o_txtfile.txt").unwrap();
+    file.write_all(
+        &o_txtfile.a_bytes
+    ).unwrap();
+
 }
