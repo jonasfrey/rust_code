@@ -110,6 +110,7 @@ fn main() {
     f_save_struct_array_as_file();
 
     
+    f_rounding_nums();
 }
 
 fn f_println_macro_tutorial(){
@@ -403,5 +404,33 @@ fn f_save_struct_array_as_file(){
     file.write_all(
         &o_txtfile.a_bytes
     ).unwrap();
+
+}
+fn f_rounding_nums(){
+
+    println!("(1.0_f32 / 1.5_f32) as f32: {:?}", (1.0_f32 / 1.5_f32) as f32);
+    println!("(1.0_f32 / 1.5_f32) as u8: {:?}", (1.0_f32 / 1.5_f32) as u8);
+
+    println!("(1.0_f32 / 2.0_f32) as f32: {:?}", (1.0_f32 / 2.0_f32) as f32);
+    println!("(1.0_f32 / 2.0_f32) as u8: {:?}", (1.0_f32 / 2.0_f32) as u8);
+
+    println!("(1.0_f32 / 3.0_f32) as f32: {:?}", (1.0_f32 / 3.0_f32) as f32);
+    println!("(1.0_f32 / 3.0_f32) as u8: {:?}", (1.0_f32 / 3.0_f32) as u8);
+
+    println!("(1.0_f32 / 4.0_f32) as f32: {:?}", (1.0_f32 / 4.0_f32) as f32);
+    println!("(1.0_f32 / 4.0_f32) as u8: {:?}", (1.0_f32 / 4.0_f32) as u8);
+
+    println!("(1000.0_f32 / 60.0_f32) as f32: {:?}", (1000.0_f32 / 60.0_f32) as f32);
+    println!("(1000.0_f32 / 60.0_f32) as u8: {:?}", (1000.0_f32 / 60.0_f32) as u8);
+
+    // keep f32 ronding down 
+    println!("(((5.0_f32 / 3.0_f32) as u32) as f32): {:?}",(((5.0_f32 / 3.0_f32) as u32) as f32));
+    // rounding down with floor
+    println!("(5.0_f32 / 3.0_f32).floor(): {:?}",(5.0_f32 / 3.0_f32).floor());
+    // rounding up with ceil
+    println!("(5.0_f32 / 3.0_f32).ceil(): {:?}",(5.0_f32 / 3.0_f32).ceil());
+    // roundiing up if >= x.5 , rounding down if <= x.5 
+    println!("(1.666_f32).round(): {:?}",(1.666_f32).round());
+    println!("(0.333_f32).round(): {:?}",(0.333_f32).round());
 
 }
