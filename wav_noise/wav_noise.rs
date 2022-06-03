@@ -147,7 +147,7 @@ fn f_o_wav()-> O_wav {
     let n_num_channels: u32 = 1; // number of channels, 1 = mono
 
     let n_samples_per_second_aka_samplerate: u32 = 44100; // 44100 common, 4800 CD quality, 88200 better quality, number of samples per second!
-    let n_bits_per_sample: u32 = 16; 
+    let n_bits_per_sample: u32 = 8; 
     let n_bits_per_second_all_channels: u32 = n_bits_per_sample * n_samples_per_second_aka_samplerate * n_num_channels;
     let n_bytes_per_second_all_channels: u32 = n_bits_per_second_all_channels / 8;
     let n_block_align: u32 = n_num_channels * (n_bits_per_sample / 8);
@@ -263,7 +263,7 @@ fn f_o_wav()-> O_wav {
     };
 }
 
-fn f_add_samples(
+fn f_add_sound(
     mut o_wav: O_wav,
     n_frequency_cycles_per_second: u32, // eg. 432, //frequency
     s_wavetype: String, // eg. 'sawtooth' , 'sine'  
@@ -274,26 +274,49 @@ fn f_add_samples(
     let n_samples_to_add = ((o_wav.n_samples_per_second_aka_samplerate as f32) / 1000.0 * (n_milliseconds as f32))as u32;
     let mut n_count_sample = 0;
 
-    let mut n_radians: f32 = 3.14159;
-    // let n_radians_per_sample: f32 = o_wav.n_samples_per_second_aka_samplerate as f32 / n_frequency_cycles_per_second as f32;
-    let n_samples_per_cycles: f32 = o_wav.n_samples_per_second_aka_samplerate as f32 / n_frequency_cycles_per_second as f32;
-    let n_u16_increment_per_sample: u16 = (u16::MAX as f32 / n_samples_per_cycles as f32) as u16; 
-    // let n_value_per_sample: u32 = o_wav.n_samples_per_second_aka_samplerate
-    
-
-    let mut n_val_increment_to_match_freq: u32 = n_u16_increment_per_sample as u32;
-    let mut n_inc: f32 = 0.5;
-    let mut n_time: f32 = 0.0;
+    let n_samples_per_cycle: u32 = (o_wav.n_samples_per_second_aka_samplerate / n_frequency_cycles_per_second);
+    let n_radians_per_sample: f64 = std::f64::consts::TAU / ((n_samples_per_cycle as f64) * 4.0);
+    let mut n_radians: f64 = 0.0;
+    let mut n_sample_value: u8 = 0;
+    let n_amplitude: f32 = 1.0;// the full amplitude somehow does not work
+    println!("(n_amplitude * (u16::MAX as f32)) {:?}", (n_amplitude * (u16::MAX as f32)));
+    println!("((u16::MAX as f32)) {:?}", ((u16::MAX as f32)));
+    println!("((u16::MAX as f32)) {:?}", ((u16::MAX as f32)));
+    println!("(n_amplitude * (u16::MAX as f32)) as u16 {:?}", (n_amplitude * (u16::MAX as f32)) as u16);
     while n_count_sample < n_samples_to_add {
-        n_time = (n_time + n_inc) % (u16::MAX) as f32;
-        n_val_increment_to_match_freq += n_val_increment_to_match_freq % (u16::MAX) as u32; 
-        // n_radians_start = n_radians;
-        // let n_u16 = (((n_radians_start.sin() * (u16::MAX) as f32) + ((u16::MAX as f32)/2.0))) as u16;
-        // let n_u16 = n_rand_u16;
-        let a_n_u16 = f_a_convert_u16_to_2_u8_values(n_time as u16);
-        o_wav.a_array.push(a_n_u16[0+0]);
-        o_wav.a_array.push(a_n_u16[0+1]);
+        if(s_wavetype == String::from("square")){
+            // if square wave , signal is on or off
+            if (n_count_sample % (n_samples_per_cycle * 2)) > n_samples_per_cycle{
+                n_sample_value = 0;
+            }else{
+                // println!("{}", (n_amplitude * (u16::MAX as f32)));            
+                n_sample_value = (n_amplitude * (u16::MAX as f32)) as u8;// if it is u16 max, it wont work 
+            }
+        }
 
+        if(s_wavetype == String::from("sine")){
+            n_radians += n_radians_per_sample;
+
+            let n_sample_value_i16 = (f64::sin(n_radians) * n_amplitude as f64 * (i16::MAX as f64) as f64) as i16;
+            let n_sample_value_i32 = ((u16::MAX / 2) as i32 + (n_sample_value_i16 as i32))+1;  
+            n_sample_value = n_sample_value_i32 as u8;
+            // println!("n_sample_value_i16 {}", n_sample_value_i16);
+            // println!("n_sample_value_i32 {}", n_sample_value_i32);
+        }   
+
+        if(s_wavetype == String::from("sawtooth")){
+            // if square wave , signal is on or off
+            let n_test =  ((n_count_sample % (n_samples_per_cycle*2)) as f32 / ((n_samples_per_cycle*2)  as f32));
+            println!("{}", n_test);
+            n_sample_value = ((255 as f32) * n_test) as u8;
+            
+        }
+
+        // let a_n_u16 = f_a_convert_u16_to_2_u8_values(n_sample_value as u16);
+        // o_wav.a_array.push(a_n_u16[0+0]);
+        // o_wav.a_array.push(a_n_u16[0+1]);
+
+        o_wav.a_array.push(n_sample_value);
         n_count_sample = n_count_sample + 1; 
     }
 
@@ -322,15 +345,27 @@ fn main() -> std::io::Result<()> {
 
     // get the struct
     let mut o_wav = f_o_wav();
-    o_wav = f_add_samples(
+    o_wav = f_add_sound(
         o_wav,// o_wav struct
-        1000, //frequency
+        440, //frequency
+        String::from("square"), //wave type 'sawtooth' , 'sine' 
+        300, // milliseconds
+    );
+    o_wav = f_add_sound(
+        o_wav,// o_wav struct
+        440, //frequency
+        String::from("sine"), //wave type 'sawtooth' , 'sine' 
+        300, // milliseconds
+    );
+    o_wav = f_add_sound(
+        o_wav,// o_wav struct
+        440, //frequency
         String::from("sawtooth"), //wave type 'sawtooth' , 'sine' 
-        1000, // milliseconds
+        300, // milliseconds
     );
     f_save_o_wav(
         o_wav,
-        String::from("testlololo.wav")
+        String::from("square_test.wav")
     );
 
     //     // println!("{}", n_i);

@@ -14,8 +14,8 @@ use std::process::exit;
 use std::convert::TryInto;
 
 
-const N_IMG_WIDTH: u32 = 512;
-const N_IMG_HEIGTH: u32 = 512;
+const N_IMG_WIDTH: u32 = 1000;
+const N_IMG_HEIGTH: u32 = 1000;
 
 
     
@@ -156,8 +156,6 @@ fn f_a_selectionsort(
         
         let n_start = n_index; 
         let mut n_index2 = n_start;
-
-
         
         while n_index2 < a_n_numbers.len(){
             // f_draw_image((&mut a_n_numbers).to_vec());
@@ -281,7 +279,7 @@ fn f_quicksort(
 }
 fn main() {
 
-    let mut a_n_randnum = f_a_n_randnum(32);
+    let mut a_n_randnum = f_a_n_randnum(200);
     println!("{:?}", a_n_randnum);
 
     // f_a_selectionsort(&mut a_n_randnum);

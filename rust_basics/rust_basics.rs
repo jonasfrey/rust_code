@@ -111,6 +111,8 @@ fn main() {
 
     
     f_rounding_nums();
+
+    f_compare_strings();
 }
 
 fn f_println_macro_tutorial(){
@@ -432,5 +434,21 @@ fn f_rounding_nums(){
     // roundiing up if >= x.5 , rounding down if <= x.5 
     println!("(1.666_f32).round(): {:?}",(1.666_f32).round());
     println!("(0.333_f32).round(): {:?}",(0.333_f32).round());
+
+}
+
+fn f_compare_strings(){
+
+    let s_test_a = String::from("test1");
+    let s_test_b = String::from("test1");
+
+    println!("s_test_a == s_test_b: {}", s_test_a == s_test_b);
+
+    f_compare_strings_in_different_scope(s_test_a);
+}
+fn f_compare_strings_in_different_scope(
+    s: String
+){
+    println!("s_test_a == s_test_b: {}", String::from("test1") == s);
 
 }
