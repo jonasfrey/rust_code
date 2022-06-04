@@ -1,9 +1,13 @@
+extern crate image;
 use std::fs::File;
 use std::io::prelude::*;
 use std::process::exit;
 use std::convert::TryInto;
 use std::time::{Duration, SystemTime};
+
 use std::time::UNIX_EPOCH;
+use image::GenericImageView;
+
 
 use rand::Rng;
 
@@ -263,6 +267,11 @@ fn f_o_wav()-> O_wav {
     };
 }
 
+fn f_n_number_of_samples_in_o_wav(
+    o_wav: &O_wav 
+) -> u32{
+    return o_wav.a_array.len() as u32 - o_wav.n_header_end_index; 
+}
 fn f_add_sound(
     mut o_wav: O_wav,
     n_frequency_cycles_per_second: u32, // eg. 432, //frequency
@@ -275,43 +284,46 @@ fn f_add_sound(
     let mut n_count_sample = 0;
 
     let n_samples_per_cycle: u32 = (o_wav.n_samples_per_second_aka_samplerate / n_frequency_cycles_per_second);
-    let n_radians_per_sample: f64 = std::f64::consts::TAU / ((n_samples_per_cycle as f64) * 4.0);
+    let n_radians_per_sample: f64 = std::f64::consts::TAU / ((n_samples_per_cycle as f64));
     let mut n_radians: f64 = 0.0;
     let mut n_sample_value: u8 = 0;
-    let n_amplitude: f32 = 1.0;// the full amplitude somehow does not work
+    let n_amplitude: f32 = 0.5;// the full amplitude somehow does not work
+    
+    // depends on the bit depth
+    let n_max: u8 = 255; 
     println!("(n_amplitude * (u16::MAX as f32)) {:?}", (n_amplitude * (u16::MAX as f32)));
     println!("((u16::MAX as f32)) {:?}", ((u16::MAX as f32)));
     println!("((u16::MAX as f32)) {:?}", ((u16::MAX as f32)));
     println!("(n_amplitude * (u16::MAX as f32)) as u16 {:?}", (n_amplitude * (u16::MAX as f32)) as u16);
     while n_count_sample < n_samples_to_add {
+        let n_amplitude_offset: u8 = ((n_amplitude as f64/2.0) * n_max as f64) as u8;
+
         if(s_wavetype == String::from("square")){
             // if square wave , signal is on or off
-            if (n_count_sample % (n_samples_per_cycle * 2)) > n_samples_per_cycle{
-                n_sample_value = 0;
+            if (n_count_sample % (n_samples_per_cycle)) > n_samples_per_cycle / 2{
+                n_sample_value = 0 + n_amplitude_offset;
             }else{
-                // println!("{}", (n_amplitude * (u16::MAX as f32)));            
-                n_sample_value = (n_amplitude * (u16::MAX as f32)) as u8;// if it is u16 max, it wont work 
+                n_sample_value = (n_amplitude * n_max as f32) as u8 + n_amplitude_offset;// if it is u16 max, it wont work 
             }
         }
 
         if(s_wavetype == String::from("sine")){
             n_radians += n_radians_per_sample;
-
-            let n_sample_value_i16 = (f64::sin(n_radians) * n_amplitude as f64 * (i16::MAX as f64) as f64) as i16;
-            let n_sample_value_i32 = ((u16::MAX / 2) as i32 + (n_sample_value_i16 as i32))+1;  
-            n_sample_value = n_sample_value_i32 as u8;
-            // println!("n_sample_value_i16 {}", n_sample_value_i16);
-            // println!("n_sample_value_i32 {}", n_sample_value_i32);
+            n_sample_value = (((f64::sin(n_radians) * 0.5_f64  + 0.5_f64) * n_amplitude as f64) * 255 as f64) as u8 + n_amplitude_offset;
         }   
 
         if(s_wavetype == String::from("sawtooth")){
-            // if square wave , signal is on or off
-            let n_test =  ((n_count_sample % (n_samples_per_cycle*2)) as f32 / ((n_samples_per_cycle*2)  as f32));
-            println!("{}", n_test);
-            n_sample_value = ((255 as f32) * n_test) as u8;
-            
+            n_sample_value = (((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude * n_max as f32) as u8 + n_amplitude_offset;
         }
 
+        if(s_wavetype == String::from("triangle")){
+
+            if (n_count_sample % (n_samples_per_cycle)) > n_samples_per_cycle / 2{
+                n_sample_value = (((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude  * n_max as f32) as u8 + n_amplitude_offset;
+            }else{
+                n_sample_value = n_max + n_amplitude_offset*2 -(((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude  * n_max as f32) as u8 + n_amplitude_offset;
+            }
+        }
         // let a_n_u16 = f_a_convert_u16_to_2_u8_values(n_sample_value as u16);
         // o_wav.a_array.push(a_n_u16[0+0]);
         // o_wav.a_array.push(a_n_u16[0+1]);
@@ -362,6 +374,12 @@ fn main() -> std::io::Result<()> {
         440, //frequency
         String::from("sawtooth"), //wave type 'sawtooth' , 'sine' 
         300, // milliseconds
+    );
+    o_wav = f_add_sound(
+        o_wav,// o_wav struct
+        440, //frequency
+        String::from("triangle"), //wave type 'sawtooth' , 'sine' 
+        1000, // milliseconds
     );
     f_save_o_wav(
         o_wav,
@@ -521,6 +539,35 @@ fn f_save_o_wav(
     s_path_file_name: String, 
 )-> bool{
     let mut file = File::create(s_path_file_name).unwrap();
+    // create image of wavedata for debugging
+    let mut rng = rand::thread_rng();
+
+    let n_width = f_n_number_of_samples_in_o_wav(&o_wav); 
+    let n_height = 255;
+
+    let mut a_image_buffer = image::ImageBuffer::new(n_width, n_height); 
+
+
+    // A redundant loop to demonstrate reading image data
+    for n_x in 0..n_width {
+        let n_wav_sample_value: u8 = o_wav.a_array[o_wav.n_header_end_index as usize + n_x as usize] as u8; 
+        for n_y in 0..n_height {
+            let o_pixel = a_image_buffer.get_pixel_mut(n_x, n_y);
+
+            if(n_y == n_wav_sample_value.into()){
+                *o_pixel = image::Rgb([255 as u8,255 as u8,255 as u8]);
+            }else{
+                *o_pixel = image::Rgb([0 as u8,0 as u8,0 as u8]);
+
+            }
+        }
+    }
+
+    // let s_wav_image_name = str::replace("{s_path_file_name}_waveform_image.png", "{s_path_file_name}", &s_path_file_name);
+    // a_image_buffer.save(s_wav_image_name).unwrap();
+    a_image_buffer.save("_waveform_image.png").unwrap();
+
+    
     file.write_all(
         &o_wav.a_array
     ).unwrap();
