@@ -90,6 +90,7 @@ fn f_create_random_png(){
     }
     a_image_buffer.save("random_image.png").unwrap();
 }
+
 fn main() {
     // f_create_fractal_png(); 
     // f_create_green_png();

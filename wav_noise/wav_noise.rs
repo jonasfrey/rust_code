@@ -272,6 +272,8 @@ fn f_n_number_of_samples_in_o_wav(
 ) -> u32{
     return o_wav.a_array.len() as u32 - o_wav.n_header_end_index; 
 }
+#[allow(overflowing_literals)]
+
 fn f_add_sound(
     mut o_wav: O_wav,
     n_frequency_cycles_per_second: u32, // eg. 432, //frequency
@@ -284,51 +286,65 @@ fn f_add_sound(
     let mut n_count_sample = 0;
 
     let n_samples_per_cycle: u32 = (o_wav.n_samples_per_second_aka_samplerate / n_frequency_cycles_per_second);
-    let n_radians_per_sample: f64 = std::f64::consts::TAU / ((n_samples_per_cycle as f64));
-    let mut n_radians: f64 = 0.0;
+    let n_radians_per_sample: f32 = std::f32::consts::TAU / ((n_samples_per_cycle as f32)) as f32;
+    let mut n_radians: f32 = 0.0;
     let mut n_sample_value: u8 = 0;
     let n_amplitude: f32 = 0.5;// the full amplitude somehow does not work
     
     // depends on the bit depth
     let n_max: u8 = 255; 
-    println!("(n_amplitude * (u16::MAX as f32)) {:?}", (n_amplitude * (u16::MAX as f32)));
-    println!("((u16::MAX as f32)) {:?}", ((u16::MAX as f32)));
-    println!("((u16::MAX as f32)) {:?}", ((u16::MAX as f32)));
-    println!("(n_amplitude * (u16::MAX as f32)) as u16 {:?}", (n_amplitude * (u16::MAX as f32)) as u16);
+
+    let mut n_sample_value_i8: i8 = 0;
+
+    let mut n_test = 0; 
     while n_count_sample < n_samples_to_add {
-        let n_amplitude_offset: u8 = ((n_amplitude as f64/2.0) * n_max as f64) as u8;
+        
+        n_radians += n_radians_per_sample;
+        // println!("f64::sin(n_radians as f64)*128_f64: {}", f64::sin(n_radians as f64)*128_f64);
+        println!("(f64::sin(n_radians as f64)*128_f64)as i8: {}", (f64::sin(n_radians as f64)*128_f64)as i8);
+        println!("(f64::sin(n_radians as f64)*128_f64)as i8: {:#8b}", (f64::sin(n_radians as f64)*128_f64)as i8);
 
-        if(s_wavetype == String::from("square")){
-            // if square wave , signal is on or off
-            if (n_count_sample % (n_samples_per_cycle)) > n_samples_per_cycle / 2{
-                n_sample_value = 0 + n_amplitude_offset;
-            }else{
-                n_sample_value = (n_amplitude * n_max as f32) as u8 + n_amplitude_offset;// if it is u16 max, it wont work 
-            }
-        }
+        println!("(f64::sin(n_radians as f64)*128_f64)as u8: {}", (f64::sin(n_radians as f64)*128_f64)as u8);
+        println!("(f64::sin(n_radians as f64)*128_f64)as u8: {:#8b}", (f64::sin(n_radians as f64)*128_f64)as u8);
 
-        if(s_wavetype == String::from("sine")){
-            n_radians += n_radians_per_sample;
-            n_sample_value = (((f64::sin(n_radians) * 0.5_f64  + 0.5_f64) * n_amplitude as f64) * 255 as f64) as u8 + n_amplitude_offset;
-        }   
+        println!("((f64::sin(n_radians as f64)*128_f64)as i8) as u8: {}", ((f64::sin(n_radians as f64)*128_f64)as i8) as u8);
+        println!("((f64::sin(n_radians as f64)*128_f64)as i8) as u8: {:#8b}", ((f64::sin(n_radians as f64)*128_f64)as i8) as u8);
+        n_sample_value_i8 = ((((f64::sin(n_radians as f64)*128_f64) as i8) - 128));
 
-        if(s_wavetype == String::from("sawtooth")){
-            n_sample_value = (((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude * n_max as f32) as u8 + n_amplitude_offset;
-        }
+        // let n_amplitude_offset: u8 = ((n_amplitude as f64/2.0) * n_max as f64) as u8;
 
-        if(s_wavetype == String::from("triangle")){
+        // if(s_wavetype == String::from("square")){
+        //     // if square wave , signal is on or off
+        //     if (n_count_sample % (n_samples_per_cycle)) > n_samples_per_cycle / 2{
+        //         n_sample_value = 0 + n_amplitude_offset;
+        //     }else{
+        //         n_sample_value = (n_amplitude * n_max as f32) as u8 + n_amplitude_offset;// if it is u16 max, it wont work 
+        //     }
+        // }
 
-            if (n_count_sample % (n_samples_per_cycle)) > n_samples_per_cycle / 2{
-                n_sample_value = (((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude  * n_max as f32) as u8 + n_amplitude_offset;
-            }else{
-                n_sample_value = n_max + n_amplitude_offset*2 -(((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude  * n_max as f32) as u8 + n_amplitude_offset;
-            }
-        }
-        // let a_n_u16 = f_a_convert_u16_to_2_u8_values(n_sample_value as u16);
-        // o_wav.a_array.push(a_n_u16[0+0]);
-        // o_wav.a_array.push(a_n_u16[0+1]);
+        // if(s_wavetype == String::from("sine")){
+        //     n_radians += n_radians_per_sample;
+        //     n_sample_value = (((f64::sin(n_radians) * 0.5_f64  + 0.5_f64) * n_amplitude as f64) * 255 as f64) as u8 + n_amplitude_offset;
+        // }   
 
-        o_wav.a_array.push(n_sample_value);
+        // if(s_wavetype == String::from("sawtooth")){
+        //     n_sample_value = (((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude * n_max as f32) as u8 + n_amplitude_offset;
+        // }
+
+        // if(s_wavetype == String::from("triangle")){
+
+        //     if (n_count_sample % (n_samples_per_cycle)) > n_samples_per_cycle / 2{
+        //         n_sample_value = (((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude  * n_max as f32) as u8 + n_amplitude_offset;
+        //     }else{
+        //         n_sample_value = n_max + n_amplitude_offset*2 -(((n_count_sample as u32 % n_samples_per_cycle as u32) as f32 / n_samples_per_cycle as f32) * n_amplitude  * n_max as f32) as u8 + n_amplitude_offset;
+        //     }
+        // }
+
+        // // let a_n_u16 = f_a_convert_u16_to_2_u8_values(n_sample_value as u16);
+        // // o_wav.a_array.push(a_n_u16[0+0]);
+        // // o_wav.a_array.push(a_n_u16[0+1]);
+
+        o_wav.a_array.push(n_sample_value_i8 as u8);
         n_count_sample = n_count_sample + 1; 
     }
 
@@ -357,30 +373,39 @@ fn main() -> std::io::Result<()> {
 
     // get the struct
     let mut o_wav = f_o_wav();
-    o_wav = f_add_sound(
-        o_wav,// o_wav struct
-        440, //frequency
-        String::from("square"), //wave type 'sawtooth' , 'sine' 
-        300, // milliseconds
-    );
+    // o_wav = f_add_sound(
+    //     o_wav,// o_wav struct
+    //     440, //frequency
+    //     String::from("square"), //wave type 'sawtooth' , 'sine' 
+    //     300, // milliseconds
+    // );
+    // o_wav = f_add_sound(
+    //     o_wav,// o_wav struct
+    //     440, //frequency
+    //     String::from("sine"), //wave type 'sawtooth' , 'sine' 
+    //     300, // milliseconds
+    // );
+    // o_wav = f_add_sound(
+    //     o_wav,// o_wav struct
+    //     440, //frequency
+    //     String::from("sawtooth"), //wave type 'sawtooth' , 'sine' 
+    //     300, // milliseconds
+    // );
+    // o_wav = f_add_sound(
+    //     o_wav,// o_wav struct
+    //     440, //frequency
+    //     String::from("triangle"), //wave type 'sawtooth' , 'sine' 
+    //     1000, // milliseconds
+    // );
+
+    // test simple sine 
     o_wav = f_add_sound(
         o_wav,// o_wav struct
         440, //frequency
         String::from("sine"), //wave type 'sawtooth' , 'sine' 
-        300, // milliseconds
+        100, // milliseconds
     );
-    o_wav = f_add_sound(
-        o_wav,// o_wav struct
-        440, //frequency
-        String::from("sawtooth"), //wave type 'sawtooth' , 'sine' 
-        300, // milliseconds
-    );
-    o_wav = f_add_sound(
-        o_wav,// o_wav struct
-        440, //frequency
-        String::from("triangle"), //wave type 'sawtooth' , 'sine' 
-        1000, // milliseconds
-    );
+
     f_save_o_wav(
         o_wav,
         String::from("square_test.wav")

@@ -113,6 +113,10 @@ fn main() {
     f_rounding_nums();
 
     f_compare_strings();
+    
+    f_datatypes_minmax();
+
+    f_datatypes_convert_negative_u8_to_i8();
 }
 
 fn f_println_macro_tutorial(){
@@ -437,6 +441,43 @@ fn f_rounding_nums(){
 
 }
 
+fn f_datatypes_minmax(){
+    println!(" i8 has the min value of {}.", i8::min_value());
+    println!(" i8 has the max value of {}.", i8::max_value());
+    println!(" i16 has the min value of {}.", i16::min_value());
+    println!(" i16 has the max value of {}.", i16::max_value());
+    println!(" i32 has the min value of {}.", i32::min_value());
+    println!(" i32 has the max value of {}.", i32::max_value());
+    println!(" i64 has the min value of {}.", i64::min_value());
+    println!(" i64 has the max value of {}.", i64::max_value());
+    println!(" i128 has the min value of {}.", i128::min_value());
+    println!(" i128 has the max value of {}.", i128::max_value());
+    
+}
+
+fn f_datatypes_convert_negative_u8_to_i8(){
+    let n_i8_positive_127: i8 = 127;
+    let n_i8_negative_127: i8 = -127;
+    let n_i8_positive_1: i8 = 1;
+    let n_i8_negative_1: i8 = -1;
+    println!("n_i8_positive_127: {} | {:#08b}",n_i8_positive_127,n_i8_positive_127);
+    println!("-n_i8_negative_127: {} | {:#08b}",n_i8_negative_127,n_i8_negative_127);
+    println!("-n_i8_negative_127 as u8: {} | {:#08b}",n_i8_negative_127 as u8, n_i8_negative_127 as u8);
+
+    println!("n_i8_positive_1: {} | {:#08b}",n_i8_positive_1,n_i8_positive_1);
+    println!("-n_i8_negative_1: {} | {:#08b}",n_i8_negative_1,n_i8_negative_1);
+    println!("-n_i8_negative_1 as u8: {} | {:#08b}",n_i8_negative_1 as u8, n_i8_negative_1 as u8);
+
+
+    println!("-1_f64: {} | {:#64b}",-1_f64, -1_f64);
+
+    println!("-1_f64 as i8: {} | {:#08b}",-1_f64 as i8,-1_f64 as i8);
+    println!("-1_f64 as u8: {} | {:#08b}",-1_f64 as u8,-1_f64 as u8);
+    println!("(-1_f64 as i8) as u8: {} | {:#08b}",(-1_f64 as i8) as u8,(-1_f64 as i8) as u8);
+
+
+
+}
 fn f_compare_strings(){
 
     let s_test_a = String::from("test1");
