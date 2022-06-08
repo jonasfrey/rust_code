@@ -33,18 +33,44 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>{
         // let img = ImageReader::open(s_wtf).decode();
         
         let o_img_rgb = ImageReader::open(s_wtf)?.decode()?;
-        // let a_a_b : Vec<Vec<bool>> = vec!(vec!(false, o_img_rgb.dimensions().0), o_img_rgb.dimensions().1);
-        let a_a_b : Vec<Vec<bool>> = Vec::new();
+        let a_a_b : Vec<Vec<bool>> = vec!(vec!(false; o_img_rgb.dimensions().0 as usize); o_img_rgb.dimensions().1 as usize);
+
+        // let a_a_b : Vec<Vec<bool>> = Vec::new();
         let mut o_json_pixel = json!({
             // quotes on keys are optional
             "a_a_b":a_a_b,
             "s_letter": s_filename,
             "b_uppercase": true, 
         });
+        let n_index_rgba = 0;
+        let n_index_pixel = 0;
+        let n_x = 0; 
+        let n_y = 0;   
+        // while(n_index_rgba <  o_img_rgb.to_luma8() ){
+        //     n_index_pixel = (n_index_rgba as f32 / 4.0) as u32;
+        //     if(n_index_rgba % 4== 0){
 
-        println!("o_json_pixel {:?}", o_json_pixel["a_a_b"]);
-        o_json_pixel["a_a_b"][0] = serde_json::Value::Array(Vec::new());
-        println!("o_json_pixel {:?}", o_json_pixel);
+        //         n_y = n_in
+        //         n_x = n_x+1 % o_img_rgb.width();
+        //     }
+        //     n_index_rgba++;
+        // }
+        println!("o_img_rgb.pixels(){:?}",o_img_rgb.pixels());
+        println!("o_img_rgb{:?}",o_img_rgb); 
+        for o_pixel in o_img_rgb.pixels(){
+            println!("o_pixel in o_img_rgb.pixels(){:?}", o_pixel);
+            if(o_pixel.2[3] == 0){
+                o_json_pixel["a_a_b"][o_pixel.0 as usize][o_pixel.1 as usize] = serde_json::Value::Bool(true);
+            }
+        }
+        std::fs::write(
+            s_filename+".json",
+            serde_json::to_string_pretty(&o_json_pixel).unwrap(),
+        )
+        .unwrap();
+        // println!("o_json_pixel {:?}", o_json_pixel["a_a_b"]);
+        // o_json_pixel["a_a_b"][0] = serde_json::Value::Array(Vec::new());
+        // println!("o_json_pixel {:?}", o_json_pixel);
 
         // let a_o_pixel = o_img_rgb.pixels();
         // let mut a_b = vec!();  

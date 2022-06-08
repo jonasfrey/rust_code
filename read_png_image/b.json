@@ -1,0 +1,41 @@
+{
+  "a_a_b": [
+    [
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    [
+      true,
+      false,
+      true,
+      false,
+      true
+    ]
+  ],
+  "b_uppercase": true,
+  "s_letter": "b"
+}

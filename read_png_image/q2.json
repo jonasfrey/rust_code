@@ -1,0 +1,41 @@
+{
+  "a_a_b": [
+    [
+      true,
+      false,
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      false,
+      true
+    ],
+    [
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  ],
+  "b_uppercase": true,
+  "s_letter": "q2"
+}
