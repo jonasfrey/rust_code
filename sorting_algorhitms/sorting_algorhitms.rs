@@ -17,6 +17,8 @@ use std::convert::TryInto;
 const N_IMG_WIDTH: u32 = 1000;
 const N_IMG_HEIGTH: u32 = 1000;
 
+const N_FPS = 60.0;
+
 
     
 // This is the main function
@@ -145,7 +147,8 @@ fn f_a_selectionsort(
     let s_folder_path_name = str::replace("./selectionsort_images_{}/", "{}", &(n_ts_ms).to_string());
 
     let mut n_index = 0; 
-    let mut n_value =0; 
+    let mut n_value = 0;
+
     while n_index < a_n_numbers.len(){
         n_value = a_n_numbers[n_index];     
     // for (n_index, n_value) in a_n_numbers.iter().enumerate() {
@@ -161,12 +164,11 @@ fn f_a_selectionsort(
             // f_draw_image((&mut a_n_numbers).to_vec());
             f_draw_image(a_n_numbers.to_vec(), &s_folder_path_name, n_index2 as u32);
 
-            let n_fps = 60.0;
             o_wav = f_add_samples(
                 o_wav,// o_wav struct
                 (a_n_numbers[n_index2] as f32 / (u8::MAX) as f32) as f32 * 5.0f32, //frequency
                 String::from("sawtooth"), //wave type 'sawtooth' , 'sine' 
-                (1000.0/n_fps)as u32, // milliseconds
+                (1000.0/N_FPS)as u32, // milliseconds
             );
             if(a_n_numbers[n_index2] < n_min){
                 n_min_index = n_index2;
@@ -189,6 +191,29 @@ fn f_a_selectionsort(
         o_wav,
         s_folder_path_name_wavfile
     );
+    
+    // ffmpeg -i audio.wav -framerate 60 -pattern_type glob -i '*.png' -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
+
+    Command::new("ffmpeg")
+        .arg("-i")
+        .arg(s_folder_path_name_wavfile)
+        .arg("-framerate")
+        .arg(N_FPS)
+        .arg("-pattern_type")
+        .arg("glob")
+        .arg("-i")
+        .arg("'*.png'")
+        .arg("-c:v")
+        .arg("libx264")
+        .arg("-profile:v")
+        .arg("high")
+        .arg("-crf")
+        .arg("20")
+        .arg("-pix_fmt")
+        .arg("yuv420p")
+        .arg("output.mp4")
+        .output()
+        .expect("failed to execute process")
 
     // return a_n_numbers;
 }
@@ -279,7 +304,7 @@ fn f_quicksort(
 }
 fn main() {
 
-    let mut a_n_randnum = f_a_n_randnum(200);
+    let mut a_n_randnum = f_a_n_randnum(100);
     println!("{:?}", a_n_randnum);
 
     // f_a_selectionsort(&mut a_n_randnum);
@@ -313,14 +338,13 @@ fn main() {
 
 fn  f_test_wav(){
     let mut o_wav = f_o_wav();
-    let n_fps = 60.0;
     for n in 0..100{
 
         o_wav = f_add_samples(
             o_wav,// o_wav struct
             (5.0/100.0 * n as f32) as f32, //frequency
             String::from("sawtooth"), //wave type 'sawtooth' , 'sine' 
-            (1000.0/n_fps)as u32, // milliseconds
+            (1000.0/N_FPS)as u32, // milliseconds
         );
     }
     let mut rng = rand::thread_rng();
@@ -332,7 +356,7 @@ fn  f_test_wav(){
             o_wav,// o_wav struct
             n_rand + 5.0, //frequency
             String::from("sawtooth"), //wave type 'sawtooth' , 'sine' 
-            (1000.0/n_fps)as u32, // milliseconds
+            (1000.0/N_FPS)as u32, // milliseconds
         );
     }
 
