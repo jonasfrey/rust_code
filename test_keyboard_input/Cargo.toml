@@ -1,13 +1,10 @@
 [package]
-name = "enigo_example"
+name = "test_keyboard_input"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-enigo = "0.0.14"
-crossterm = "0.25.0"
-macroquad = "0.3"
-serde_json = "1.0.83"
-strum = "0.24.1"
+crossterm = "0.16.0"
+termion = "1.5.5"
