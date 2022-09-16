@@ -1,0 +1,1 @@
+await Bun.write(Bun.stdout, Bun.file("file.txt"));

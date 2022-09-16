@@ -68,7 +68,7 @@ int f_write_to_file ()
 
 
     int n_i = 0; 
-    int n_max = 999;
+    int n_max = 999999;
     
     while(n_i < n_max){
         struct O_person input1 = {n_i, "some body", "some@body.com"};
