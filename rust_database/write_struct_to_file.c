@@ -5,13 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
  
-// typedef enum
-// {
-//     button_left = 1,   // 0 0 0 1              
-//     button_right = 2,  // 0 0 1 0
-//     button_up = 4,     // 0 1 0 0 
-//     button_down = 8,   // 1 0 0 0  
-// } Button_pressed; 
 
 
 // a struct to read and write
@@ -20,7 +13,6 @@ struct O_person
     int n_id;
     char s_name[20];
     char s_email[20];
-    // char n_button_pressed;
 };
 
   
