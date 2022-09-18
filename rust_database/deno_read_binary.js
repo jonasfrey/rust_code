@@ -7,7 +7,10 @@
 import {f_do_it} from "./f_do_it.js"
 
 // await Bun.write ('./A_o_person.dat', a_uint8_file_content);
-const a_uint8_file_content =await Deno.readFile('./A_o_person.dat');
-// const a_uint8_file_content = readFileSync('./A_o_person.dat');
+
+// const a_uint8_file_content =await Deno.readFile('./A_o_person.dat');
+
+const a_uint8_file_content =await Deno.readFile('./a_o_person');
+// the content is a rust Vec<u8> which starts with the number of objects as the first 8 bytes
 
 f_do_it(a_uint8_file_content)
