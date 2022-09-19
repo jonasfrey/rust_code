@@ -45,7 +45,8 @@ fn main()  -> Result<(), Box<dyn std::error::Error>>{
         let n_index_rgba = 0;
         let n_index_pixel = 0;
         let n_x = 0; 
-        let n_y = 0;   
+        let n_y = 0;
+         
         // while(n_index_rgba <  o_img_rgb.to_luma8() ){
         //     n_index_pixel = (n_index_rgba as f32 / 4.0) as u32;
         //     if(n_index_rgba % 4== 0){

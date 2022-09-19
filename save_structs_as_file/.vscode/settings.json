@@ -1,0 +1,8 @@
+{
+
+"workbench.editorAssociations": {
+    "*.hex": "hexEditor.hexedit",
+    "*.bin": "hexEditor.hexedit",
+    "*.ini": "hexEditor.hexedit"
+},
+}   
