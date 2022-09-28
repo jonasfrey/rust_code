@@ -1,0 +1,16 @@
+[package]
+name = "show_image_test"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+"show-image" = "0.13.1"
+"png" = "0.17.6"
+# enigo = "0.0.14"
+autopilot = "0.4.0"
+# ggez = "0.7.0"
+# buttons = "0.3.1"
+# ggez = "0.5.1"
+# readmouse = "0.2.1"
