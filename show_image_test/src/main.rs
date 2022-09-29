@@ -4,8 +4,8 @@
 use std::path::Path;
 use std::fs::File;
 
-use std::time::{SystemTime, UNIX_EPOCH, Instant};
-
+use std::time::{SystemTime, UNIX_EPOCH, Instant, Duration};
+use std::f64::consts::TAU;
 
 
 
@@ -19,6 +19,68 @@ use autopilot::mouse;
 
 use show_image::{event, ImageView, ImageInfo, create_window};
 
+fn f_draw_circle(
+    a_n_u8_pixel: &mut Vec<u8>,
+    n_vector_pixels_x : u32,
+    n_vector_pixels_y : u32,
+    n_channels: u32,
+    n_position_x : u32,
+    n_position_y : u32,
+    n_size_x : u32,
+    n_size_y : u32,
+    a_color : &Vec<u8>
+){
+    let mut n_radius_x = 0; 
+    let mut n_radius_y = 0;
+    
+    // simple 
+    let mut n_radius = 0;
+    let mut n_radians_per_step: f64 = 0.0;
+    let mut n_steps = 0;
+    // x        /radius 1 / steps 1 
+
+    //  x       /radius 2 / steps 4
+    // x x
+    //  x
+
+    //  xx     /radius 2.5 / steps 8
+    // x  x
+    // x  x
+    //  xx
+
+
+    // lets do steps = radius*radius
+    
+    while(n_radius < n_size_x){
+        let n_number_of_pixels_for_circumfence = 2.0 as f64 * n_radius as f64 * (TAU/2.0);
+        // n_steps = n_radius * (n_radius/3); 
+        n_steps = n_number_of_pixels_for_circumfence as u32;
+
+        n_radians_per_step = TAU / (( n_steps ) as f64);
+
+        let mut n_i_step = 0; 
+        while(n_i_step < n_steps){
+            let n_radians = (n_radians_per_step * (n_i_step as f64) as f64);
+            let n_x = n_radius as f64 * ((n_radians)as f64).sin();
+            let n_y = n_radius as f64 * ((n_radians)as f64).cos();
+                        
+            let n_index_pixel = 
+            ((((n_position_y as i32) + (n_y as i32)) as u32) * n_vector_pixels_x * n_channels) +
+            ((((n_position_x as i32) + (n_x as i32)) as u32) * n_channels);
+
+            let mut n_channel = 0;
+            while(n_channel < n_channels){
+                a_n_u8_pixel[(n_index_pixel+n_channel) as usize] = a_color[n_channel as usize];
+                n_channel+=1;
+            }
+
+            n_i_step += 1;
+        }
+
+        n_radius+=1;
+    }
+
+}
 fn f_draw_rect(
     a_n_u8_pixel: &mut Vec<u8>,
     n_vector_pixels_x : u32,
@@ -86,7 +148,7 @@ fn f_draw_rect(
 #[show_image::main]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
-    let n_vector_pixels_x: u32 = 1080; 
+    let n_vector_pixels_x: u32 = 1920; 
     let n_vector_pixels_y: u32 = 1080;
     let n_screen_rect_size_x = 1920;
     let n_screen_rect_size_y = 1080;
@@ -148,7 +210,8 @@ fn f_animate_using_autopilot(
         let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as u32;
         // println!("n_pixel_pos_x: {:?}", n_pixel_pos_x);
 
-        f_draw_rect(
+        // f_draw_rect(
+        f_draw_circle(
             a_n_u8_pixel,
             n_vector_pixels_x, 
             n_vector_pixels_y, 
@@ -204,8 +267,8 @@ fn f_animate_using_window_event(
             n_ts_ms_now = o_since_the_epoch.as_micros();
             n_ts_ms_delta = n_ts_ms_now - n_ts_ms_last; 
 
-            if(n_ts_ms_delta > n_milliseconds_per_frame as u128){
-
+            if(n_ts_ms_delta > (n_milliseconds_per_frame as u128)){
+                println!("delta {:?}", n_ts_ms_delta);
                 let n_mouse_x_normalized = ((event.position[0]) as f32 /n_screen_rect_size_x as f32); 
                 let n_mouse_y_normalized = ((event.position[1]) as f32 /n_screen_rect_size_y as f32);
     
@@ -213,18 +276,16 @@ fn f_animate_using_window_event(
                 let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as u32;
                 // println!("n_pixel_pos_x: {:?}", n_pixel_pos_x);
     
-                let now = Instant::now();
-
+                // let now = Instant::now();
                 // we sleep for 2 seconds
-                sleep(Duration::new(2, 0));
+                // sleep(Duration::new(2, 0));
                 // it prints '2'
-                println!("{}", now.elapsed().as_secs());
+                // println!("{}", now.elapsed().as_secs());
 
 
-                let o_inst_now = Instant::now();
-                let n_ts_mis_now = now.elapsed().as
-                println!("{}", now.elapsed().as_secs());
-                f_draw_rect(
+                // let o_inst_now = Instant::now();
+                // println!("{}", now.elapsed().as_secs());
+                f_draw_circle(
                     a_n_u8_pixel,
                     n_vector_pixels_x, 
                     n_vector_pixels_y, 
