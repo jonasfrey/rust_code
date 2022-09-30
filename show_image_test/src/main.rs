@@ -34,21 +34,27 @@ fn f_a_color_rgba_mixed(
     a_color_rgba_2: Vec<u8>,
 ) -> Vec<u8>{
 
-    let n_r_1 = a_color_rgba_1[0 as usize] as f32;
-    let n_g_1 = a_color_rgba_1[1 as usize] as f32;
-    let n_b_1 = a_color_rgba_1[2 as usize] as f32;
-    let n_a_1 = a_color_rgba_1[3 as usize] as f32;
-    let n_r_2 = a_color_rgba_2[0 as usize] as f32;
-    let n_g_2 = a_color_rgba_2[1 as usize] as f32;
-    let n_b_2 = a_color_rgba_2[2 as usize] as f32;
-    let n_a_2 = a_color_rgba_2[3 as usize] as f32;
+    let n_r_1 = a_color_rgba_1[0 as usize] as f32; //rA
+    let n_g_1 = a_color_rgba_1[1 as usize] as f32; //gA
+    let n_b_1 = a_color_rgba_1[2 as usize] as f32; //bA
+    let n_a_1 = a_color_rgba_1[3 as usize] as f32; //n_a_1
+    let n_r_2 = a_color_rgba_2[0 as usize] as f32; //rB
+    let n_g_2 = a_color_rgba_2[1 as usize] as f32; //gB
+    let n_b_2 = a_color_rgba_2[2 as usize] as f32; //bB
+    let n_a_2 = a_color_rgba_2[3 as usize] as f32; //aB
 
     let n_max : f32 = 255.0;
 
-    let n_r_mixed = (n_r_1 * n_a_1 / n_max) + (n_r_2 * n_b_2 * (n_max - n_a_1) / (n_max*n_max));
-    let n_g_mixed = (n_g_1 * n_a_1 / n_max) + (n_g_2 * n_b_2 * (n_max - n_a_1) / (n_max*n_max));
-    let n_b_mixed = (n_b_1 * n_a_1 / n_max) + (n_b_2 * n_b_2 * (n_max - n_a_1) / (n_max*n_max));
-    let n_a_mixed = n_a_1 + (n_b_2 * (n_max - n_a_1) / n_max);
+    // let n_r_mixed = (n_r_1 * n_a_1 / n_max) + (n_r_2 * n_b_2 * (n_max - n_a_1) / (n_max*n_max));
+    // let n_g_mixed = (n_g_1 * n_a_1 / n_max) + (n_g_2 * n_b_2 * (n_max - n_a_1) / (n_max*n_max));
+    // let n_b_mixed = (n_b_1 * n_a_1 / n_max) + (n_b_2 * n_b_2 * (n_max - n_a_1) / (n_max*n_max));
+    // let n_a_mixed = n_a_1 + (n_b_2 * (n_max - n_a_1) / n_max);
+
+
+    let n_a_mixed = n_a_1 + (n_a_2 * (n_max - n_a_1) / n_max);
+    let n_r_mixed = (n_r_1 * n_a_1 + n_r_2 * n_a_2 * (n_max - n_a_1) / n_max)/n_a_mixed ;
+    let n_g_mixed = (n_g_1 * n_a_1 + n_g_2 * n_a_2 * (n_max - n_a_1) / n_max)/n_a_mixed ;
+    let n_b_mixed = (n_b_1 * n_a_1 + n_b_2 * n_a_2 * (n_max - n_a_1) / n_max)/n_a_mixed ;
 
     return vec![
         n_r_mixed as u8,
@@ -58,7 +64,91 @@ fn f_a_color_rgba_mixed(
     ]
     // return a_color_rgba_mixed;
 }
-fn f_draw_letter(
+fn f_draw_string(
+    a_n_u8_pixel: &mut Vec<u8>,
+    n_vector_pixels_x : u32,
+    n_vector_pixels_y : u32,
+    n_channels: u32,
+    n_position_x : u32,
+    n_position_y : u32,
+    n_font_size_scale : f32,
+    a_color : &Vec<u8>, 
+    s_string: String, 
+){
+
+    let a_n_char = s_string.as_bytes();
+    let mut n_position_x_char = n_position_x;
+
+
+    // f_draw_char(
+    //     a_n_u8_pixel,
+    //     n_vector_pixels_x,
+    //     n_vector_pixels_y ,
+    //     n_channels,
+    //     n_position_x + 0 * 50, 
+    //     n_position_y ,
+    //     n_font_size_scale, 
+    //     a_color ,
+    //     a_n_char[0],
+    // );
+    // f_draw_char(
+    //     a_n_u8_pixel,
+    //     n_vector_pixels_x,
+    //     n_vector_pixels_y ,
+    //     n_channels,
+    //     n_position_x + 1 * 50, 
+    //     n_position_y ,
+    //     n_font_size_scale, 
+    //     a_color ,
+    //     a_n_char[1],
+    // );
+
+
+
+    let mut n_len = a_n_char.len();
+    let mut n_i = 0; 
+    while(n_i < n_len){
+        let n_char = a_n_char[n_i];
+        let n_char_index = n_char - 32;
+        let n_size_x_char = constants_chars_a_u8::a_n_size_x[n_char_index as usize];
+        // let n_size_y_char = constants_chars_a_u8::a_n_size_y[n_char_index as usize];
+        f_draw_char(
+            a_n_u8_pixel,
+            n_vector_pixels_x,
+            n_vector_pixels_y ,
+            n_channels,
+            n_position_x_char, 
+            n_position_y ,
+            n_font_size_scale, 
+            a_color ,
+            n_char,
+        );
+        // n_position_x_char += n_size_x_char;
+        n_position_x_char += 50;
+        n_i+=1;
+    }
+    // for n_char in a_n_char.iter() {
+    //     println!("n_char {:?}", n_char);
+    //     let n_char_index = n_char - 32;
+    //     // let n_size_x_char = constants_chars_a_u8::a_n_size_x[n_char_index as usize];
+    //     // let n_size_y_char = constants_chars_a_u8::a_n_size_y[n_char_index as usize];
+    //     f_draw_char(
+    //         a_n_u8_pixel,
+    //         n_vector_pixels_x,
+    //         n_vector_pixels_y ,
+    //         n_channels,
+    //         n_position_x_char, 
+    //         n_position_y ,
+    //         n_font_size_scale, 
+    //         a_color ,
+    //         *n_char,
+    //     );
+    //     // n_position_x_char += n_size_x_char;
+    //     n_position_x_char += 10;
+    // }
+}
+
+fn f_draw_char(
     a_n_u8_pixel: &mut Vec<u8>,
     n_vector_pixels_x : u32,
     n_vector_pixels_y : u32,
@@ -71,7 +161,6 @@ fn f_draw_letter(
     n_char: u8, 
 ){
 
-    let mut o_rand_thread_rng = rand::thread_rng();
 
     // let n_char = s_char.as_bytes()[0];
     // println!("nchar {:?}", n_char);
@@ -99,31 +188,47 @@ fn f_draw_letter(
             n_y_normalized = n_y / (n_size_y_char * n_font_size_scale);
             n_y_char = n_y_normalized * n_size_y_char;
 
-            n_channel = 0;
-            while(n_channel < n_channels){
-                // println!("n_pixel_index :{:?}", n_pixel_index);
-                let n_index_pixel = 
-                ((((n_position_y as i32) + (n_y as i32)) as u32) * n_vector_pixels_x * n_channels) +
-                ((((n_position_x as i32) + (n_x as i32)) as u32) * n_channels);
-                let n_index_pixel_char = 
-                n_char_start_index as u32+ 
-                ((n_y_char as u32) * (n_size_x_char as u32) * n_channels_char) +
-                ((n_x_char as u32) * n_channels_char);
-                // println!("x|y char {:?} {:?}", n_x_char, n_y_char);
-                // let n_char_rgba_value = constants_chars_a_u8::a_chars_information[(n_index_pixel_char+n_channel) as usize];
-                let n_char_rgba_value = constants_chars_a_u8::a_chars_information[(n_index_pixel_char+n_char_target_channel_index) as usize]; // ommiting the +n_channel rgb to achieve monochrome
-                let mut n_val = 0;
+            // println!("n_pixel_index :{:?}", n_pixel_index);
+            let n_index_pixel = 
+            ((((n_position_y as i32) + (n_y as i32)) as u32) * n_vector_pixels_x * n_channels) +
+            ((((n_position_x as i32) + (n_x as i32)) as u32) * n_channels);
+            let n_index_pixel_char = 
+            n_char_start_index as u32+ 
+            ((n_y_char as u32) * (n_size_x_char as u32) * n_channels_char) +
+            ((n_x_char as u32) * n_channels_char);
 
-                if(n_char_rgba_value > 0){
-                    n_val = a_color[n_channel as usize]  
-                    // n_val = o_rand_thread_rng.gen::<u8>();
-                }else{
-                    n_val = 0
-                }
-                // let mut n_val = n_char_rgba_value;
-                a_n_u8_pixel[(n_index_pixel+n_channel) as usize] = n_val;
-                n_channel+=1;
+            let a_color_rgba_1 = vec![
+                a_n_u8_pixel[(n_index_pixel+0) as usize],
+                a_n_u8_pixel[(n_index_pixel+1) as usize],
+                a_n_u8_pixel[(n_index_pixel+2) as usize],
+                a_n_u8_pixel[(n_index_pixel+3) as usize]
+            ];
+            let mut n_val = 0; 
+            if(
+                constants_chars_a_u8::a_chars_information[(n_index_pixel_char+0) as usize] > 0
+            ){
+                n_val = 255;
             }
+
+            let a_color_char = vec![
+                // constants_chars_a_u8::a_chars_information[(n_index_pixel_char+0) as usize],
+                // constants_chars_a_u8::a_chars_information[(n_index_pixel_char+1) as usize],
+                // constants_chars_a_u8::a_chars_information[(n_index_pixel_char+2) as usize],
+                // constants_chars_a_u8::a_chars_information[(n_index_pixel_char+3) as usize]
+                n_val,
+                n_val,
+                n_val,
+                constants_chars_a_u8::a_chars_information[(n_index_pixel_char+3) as usize],
+            ];
+            
+            let a_color_rgba_mixed = f_a_color_rgba_mixed(a_color_rgba_1, a_color_char);
+
+            a_n_u8_pixel[(n_index_pixel+0) as usize] = a_color_rgba_mixed[0];
+            a_n_u8_pixel[(n_index_pixel+1) as usize] = a_color_rgba_mixed[1];
+            a_n_u8_pixel[(n_index_pixel+2) as usize] = a_color_rgba_mixed[2];
+            a_n_u8_pixel[(n_index_pixel+3) as usize] = a_color_rgba_mixed[3];
+
+            
 
             n_y+=1.0;
         }
@@ -272,8 +377,8 @@ fn f_draw_rect(
 #[show_image::main]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
-    let n_vector_pixels_x: u32 = 1920; 
-    let n_vector_pixels_y: u32 = 1080;
+    let n_vector_pixels_x: u32 = 1000; 
+    let n_vector_pixels_y: u32 = 1000;
     let n_screen_rect_size_x = 1920;
     let n_screen_rect_size_y = 1080;
 
@@ -312,7 +417,7 @@ fn f_animate_using_autopilot(
     n_screen_rect_size_x: u32,
     n_screen_rect_size_y: u32,
 )  {
-    let mut a_color = vec![255,0,11, 122];
+    let mut a_color = vec![255,255,255, 1];
 
 
     let mut image = ImageView::new(ImageInfo::rgba8(n_vector_pixels_x, n_vector_pixels_y), &a_n_u8_pixel); 
@@ -368,15 +473,16 @@ fn f_animate_using_window_event(
     let mut o_rand_thread_rng = rand::thread_rng();
     let mut a_color = vec![255,0,11, 122];
     let mut image = ImageView::new(ImageInfo::rgba8(n_vector_pixels_x, n_vector_pixels_y), &a_n_u8_pixel); 
-    let window = create_window("image", Default::default()).unwrap();
+    let o_window = create_window("image", Default::default()).unwrap();
     // window.set_image("image-001", image).unwrap();
-    // println!("window {:?}", window.inner_size());
+    // println!("window {:?}", window.a_inner_size());
     
-    let mut inner_size = window.run_function_wait(|window| window.inner_size()).unwrap();
-    let mut n_window_size_x = inner_size[0];
-    let mut n_window_size_y = inner_size[1];
+    let mut a_inner_size = o_window.run_function_wait(|o_window| o_window.inner_size()).unwrap();
+    let mut n_window_size_x = a_inner_size[0];
+    let mut n_window_size_y = a_inner_size[1];
    
-    
+    let mut b_mouse_down = false;
+
     let n_char_min = 65; 
     let n_char_max = 126; 
     let mut n_char = 65;
@@ -397,13 +503,13 @@ fn f_animate_using_window_event(
     let n_milliseconds_per_frame = ((1000.0)/n_fps as f32) as u128;
     let n_microseconds_pre_frame = ((1000.0*1000.0)/n_fps as f32) as u128;
 
-    for event in window.event_channel().unwrap() {
+    let mut b_frame_is_being_calculated = false;
+
+
+    for event in o_window.event_channel().unwrap() {
         if let event::WindowEvent::MouseMove(event) = event.clone() {
-            inner_size = window.run_function_wait(|window| window.inner_size()).unwrap();
-            n_window_size_x = inner_size[0];
-            n_window_size_y = inner_size[1];
            
-            println!("{:#?}", event);
+            // println!("{:#?}", event);
             n_ts_mcs_now = o_inst_now.elapsed().as_micros();
             n_ts_ms_now = o_inst_now.elapsed().as_millis();
             n_ts_mcs_delta = n_ts_mcs_now - n_ts_mcs_last;
@@ -411,77 +517,135 @@ fn f_animate_using_window_event(
             // println!("n_ts_mcs_now {:?}", n_ts_mcs_now);
             // println!("n_ts_mcs_last {:?}", n_ts_mcs_last);
             // println!("n_ts_mcs_delta {:?}", n_ts_mcs_delta);
+            // println!("n_ts_ms_delta {:?}", n_ts_ms_delta);
             // if(n_ts_mcs_delta > (n_microseconds_pre_frame as u128)){
             if(n_ts_ms_delta > (n_milliseconds_per_frame as u128)){
-                let n_mouse_x_normalized = ((event.position[0]) as f32 /n_window_size_x as f32); 
-                let n_mouse_y_normalized = ((event.position[1]) as f32 /n_window_size_y as f32);
-                
-                let n_pixel_pos_x = (n_mouse_x_normalized * n_screen_rect_size_x as f32) as u32;
-                let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as u32;
-                // println!("n_pixel_pos_x n_pixel_pos_y {:?} {:?}", n_pixel_pos_x,n_pixel_pos_y);
-                // println!("n_pixel_pos_x: {:?}", n_pixel_pos_x);
-    
-                // let now = Instant::now();
-                // we sleep for 2 seconds
-                // sleep(Duration::new(2, 0));
-                // it prints '2'
-                // println!("{}", now.elapsed().as_secs());
+                if(b_mouse_down){
 
-                a_color = vec![
-                    (o_rand_thread_rng.gen::<u8>()),
-                    (o_rand_thread_rng.gen::<u8>()),
-                    (o_rand_thread_rng.gen::<u8>()),
-                    (o_rand_thread_rng.gen::<u8>()),
-                    // 65 as u8
-                ];
-                // let o_inst_now = Instant::now();
-                // println!("{}", now.elapsed().as_secs());
-                // f_draw_letter(
-                //     a_n_u8_pixel,
-                //     n_vector_pixels_x, 
-                //     n_vector_pixels_y, 
-                //     n_channels,
-                //     n_pixel_pos_x, 
-                //     n_pixel_pos_y, 
-                //     5.0,
-                //     &a_color, 
-                //     n_char
-                // );
+                        let n_mouse_x_normalized = ((event.position[0]) as f32 /n_window_size_x as f32); 
+                        let n_mouse_y_normalized = ((event.position[1]) as f32 /n_window_size_y as f32);
+                        
+                        let n_pixel_pos_x = (n_mouse_x_normalized * n_screen_rect_size_x as f32) as u32;
+                        let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as u32;
+                        // println!("n_pixel_pos_x n_pixel_pos_y {:?} {:?}", n_pixel_pos_x,n_pixel_pos_y);
+                        // println!("n_pixel_pos_x: {:?}", n_pixel_pos_x);
+            
+                        // let now = Instant::now();
+                        // we sleep for 2 seconds
+                        // sleep(Duration::new(2, 0));
+                        // it prints '2'
+                        // println!("{}", now.elapsed().as_secs());
 
-                // f_draw_rect(
-                //     a_n_u8_pixel,
-                //     n_vector_pixels_x, 
-                //     n_vector_pixels_y,
-                //     n_channels,
-                //     n_pixel_pos_x+10, 
-                //     n_pixel_pos_y+10, 
-                //     10, 
-                //     10,
-                //     &a_color, 
-                // );
-                f_draw_circle(
-                    a_n_u8_pixel,
-                    n_vector_pixels_x, 
-                    n_vector_pixels_y,
-                    n_channels,
-                    n_pixel_pos_x+20, 
-                    n_pixel_pos_y+20, 
-                    50, 
-                    50,
-                    &a_color,
-                    );
-    
-                image = ImageView::new(ImageInfo::rgba8(n_vector_pixels_x, n_vector_pixels_y), a_n_u8_pixel);
-                window.set_image("image-001", image).unwrap();
+                        a_color = vec![
+                            255 as u8,
+                            255 as u8,
+                            255 as u8,
+                            // (o_rand_thread_rng.gen::<u8>()),
+                            // (o_rand_thread_rng.gen::<u8>()),
+                            // (o_rand_thread_rng.gen::<u8>()),
+                            // (o_rand_thread_rng.gen::<u8>()),
+                            122 as u8
+                        ];
+                        // let o_inst_now = Instant::now();
+                        // println!("{}", now.elapsed().as_secs());
+                        // f_draw_char(
+                        //     a_n_u8_pixel,
+                        //     n_vector_pixels_x, 
+                        //     n_vector_pixels_y, 
+                        //     n_channels,
+                        //     n_pixel_pos_x, 
+                        //     n_pixel_pos_y, 
+                        //     5.0,
+                        //     &a_color, 
+                        //     n_char
+                        // );
 
-                n_ts_mcs_last = n_ts_mcs_now;
-                n_ts_ms_last = n_ts_ms_now;
+                        // f_draw_rect(
+                        //     a_n_u8_pixel,
+                        //     n_vector_pixels_x, 
+                        //     n_vector_pixels_y,
+                        //     n_channels,
+                        //     n_pixel_pos_x+10, 
+                        //     n_pixel_pos_y+10, 
+                        //     10, 
+                        //     10,
+                        //     &a_color, 
+                        // );
+                        // f_draw_circle(
+                        //     a_n_u8_pixel,
+                        //     n_vector_pixels_x, 
+                        //     n_vector_pixels_y,
+                        //     n_channels,
+                        //     n_pixel_pos_x+20, 
+                        //     n_pixel_pos_y+20, 
+                        //     200, 
+                        //     200,
+                        //     &a_color,
+                        //     );
+
+                        // clear 
+                        a_n_u8_pixel.fill(0);
+
+                        f_draw_string(
+                            a_n_u8_pixel,
+                            n_vector_pixels_x, 
+                            n_vector_pixels_y, 
+                            n_channels,
+                            n_pixel_pos_x, 
+                            n_pixel_pos_y, 
+                            2.0,
+                            &a_color, 
+                            String::from("hello")
+                        );
+
+                        f_draw_string(
+                            a_n_u8_pixel,
+                            n_vector_pixels_x, 
+                            n_vector_pixels_y, 
+                            n_channels,
+                            10, 
+                            10, 
+                            2.0,
+                            &a_color,
+                            format!("ms: {}", n_ts_ms_delta)
+                        );
+
+                        // println!("s {:?}", n_ts_ms_delta.to_string());
+                        // f_draw_string(
+                        //     a_n_u8_pixel,
+                        //     n_vector_pixels_x, 
+                        //     n_vector_pixels_y, 
+                        //     n_channels,
+                        //     20, 
+                        //     20, 
+                        //     2.0,
+                        //     &a_color, 
+                        //     // String::from("a")
+                        //     // (n_ts_ms_delta as u32).to_string()
+                        //     String::from("ms:")
+                        //     // String::from(format!("ms:{}", n_ts_ms_delta))
+                        // );
+
+                        n_ts_ms_now = o_inst_now.elapsed().as_millis();
+                        n_ts_ms_delta = n_ts_ms_now - n_ts_ms_last;
+
+                        if(n_ts_ms_delta> n_milliseconds_per_frame){
+                            image = ImageView::new(ImageInfo::rgba8(n_vector_pixels_x, n_vector_pixels_y), a_n_u8_pixel);
+                            o_window.set_image("image-001", image).unwrap();
+                        }
+
+                        n_ts_mcs_last = n_ts_mcs_now;
+                        n_ts_ms_last = n_ts_ms_now;
+
+
+                }
+
             }
         }
-    if let event::WindowEvent::KeyboardInput(event) = event.clone() {
+        if let event::WindowEvent::KeyboardInput(event) = event.clone() {
 
 
-            println!("{:#?}", event);
+            // println!("{:#?}", event);
             if event.input.key_code == Some(event::VirtualKeyCode::Escape) && event.input.state.is_pressed() {
                 break;
             }
@@ -491,10 +655,27 @@ fn f_animate_using_window_event(
                 n_char = (n_char + 1) % n_char_max;
             }
             image = ImageView::new(ImageInfo::rgba8(n_vector_pixels_x, n_vector_pixels_y), a_n_u8_pixel);
-            window.set_image("image-001", image).unwrap();
+            o_window.set_image("image-001", image).unwrap();
         }
 
-      }
+        if let event::WindowEvent::MouseButton(event) = event.clone() {
+            // println!("bt {:?}", event);
+            if(event.state == show_image::event::ElementState::Pressed){
+                b_mouse_down = true;
+            }else{
+                b_mouse_down = false;
+            }
+        }
+    
+
+      
+        // loop{
+        //     image = ImageView::new(ImageInfo::rgba8(n_vector_pixels_x, n_vector_pixels_y), &a_n_u8_pixel);
+        //     o_window.set_image("image-001", image);
+        // }
+
+
+  }
 
 
 

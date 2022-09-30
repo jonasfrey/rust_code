@@ -8,7 +8,7 @@ import {O_binary_string} from "https://deno.land/x/o_binary_string@0.7/O_binary_
 // var s_string = "Axy!`"
 // const o_binary_string = new O_binary_string(s_string, n_font_size)
 // console.log(o_binary_string.o_canvas_data);
-var n_start = 32; 
+var n_start = 32;
 var n_end = 127; 
 var n_i = n_start; 
 var n_font_size = 15
