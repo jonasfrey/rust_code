@@ -389,8 +389,13 @@ fn f_animate_using_window_event(
     let mut n_ts_mcs_last = o_inst_now.elapsed().as_micros();
     let mut n_ts_mcs_delta = o_inst_now.elapsed().as_micros();
 
+    let mut n_ts_ms_now = o_inst_now.elapsed().as_millis();
+    let mut n_ts_ms_last = o_inst_now.elapsed().as_millis();
+    let mut n_ts_ms_delta = o_inst_now.elapsed().as_millis();
+
     let n_fps = 60; 
-    let n_microseconds_pre_frame = ((1000.0*1000.0)/n_fps as f32) as f32;
+    let n_milliseconds_per_frame = ((1000.0)/n_fps as f32) as u128;
+    let n_microseconds_pre_frame = ((1000.0*1000.0)/n_fps as f32) as u128;
 
     for event in window.event_channel().unwrap() {
         if let event::WindowEvent::MouseMove(event) = event.clone() {
@@ -400,11 +405,14 @@ fn f_animate_using_window_event(
            
             println!("{:#?}", event);
             n_ts_mcs_now = o_inst_now.elapsed().as_micros();
-            n_ts_mcs_delta = n_ts_mcs_now - n_ts_mcs_last; 
+            n_ts_ms_now = o_inst_now.elapsed().as_millis();
+            n_ts_mcs_delta = n_ts_mcs_now - n_ts_mcs_last;
+            n_ts_ms_delta = n_ts_ms_now - n_ts_ms_last;
             // println!("n_ts_mcs_now {:?}", n_ts_mcs_now);
             // println!("n_ts_mcs_last {:?}", n_ts_mcs_last);
             // println!("n_ts_mcs_delta {:?}", n_ts_mcs_delta);
-            if(n_ts_mcs_delta > (n_microseconds_pre_frame as u128)){
+            // if(n_ts_mcs_delta > (n_microseconds_pre_frame as u128)){
+            if(n_ts_ms_delta > (n_milliseconds_per_frame as u128)){
                 let n_mouse_x_normalized = ((event.position[0]) as f32 /n_window_size_x as f32); 
                 let n_mouse_y_normalized = ((event.position[1]) as f32 /n_window_size_y as f32);
                 
@@ -423,8 +431,8 @@ fn f_animate_using_window_event(
                     (o_rand_thread_rng.gen::<u8>()),
                     (o_rand_thread_rng.gen::<u8>()),
                     (o_rand_thread_rng.gen::<u8>()),
-                    // (o_rand_thread_rng.gen::<u8>()),
-                    65 as u8
+                    (o_rand_thread_rng.gen::<u8>()),
+                    // 65 as u8
                 ];
                 // let o_inst_now = Instant::now();
                 // println!("{}", now.elapsed().as_secs());
@@ -466,7 +474,8 @@ fn f_animate_using_window_event(
                 image = ImageView::new(ImageInfo::rgba8(n_vector_pixels_x, n_vector_pixels_y), a_n_u8_pixel);
                 window.set_image("image-001", image).unwrap();
 
-                n_ts_mcs_last = n_ts_mcs_now
+                n_ts_mcs_last = n_ts_mcs_now;
+                n_ts_ms_last = n_ts_ms_now;
             }
         }
     if let event::WindowEvent::KeyboardInput(event) = event.clone() {
