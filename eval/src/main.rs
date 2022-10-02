@@ -31,7 +31,7 @@ fn eval_dynamic(st:&str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         Ok(func())
     }
 }
-
+    
 
 fn f_b_filter_function(
     o_person: &O_person, 
