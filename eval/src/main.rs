@@ -17,6 +17,83 @@ fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
 }
 
+fn eval_dynamic(st:&str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    std::fs::write("/tmp/eval.rs",format!("#[no_mangle]fn eval() -> Vec<u8> {{ { }}}",st))?;
+    ::std::process::Command::new("rustc")
+        .args(&[
+            "-o","/tmp/eval.so",
+            "--crate-type","dylib",
+            "/tmp/eval.rs"
+        ]).spawn()?.wait_with_output()?;
+    unsafe {
+        let lib = libloading::Library::new("/tmp/eval.so")?;
+        let func: libloading::Symbol<unsafe extern fn() -> Vec<u8>> = lib.get(b"eval")?;
+        Ok(func())
+    }
+}
+
+
+fn f_b_filter_function(
+    o_person: &O_person, 
+    v: &Value
+) -> bool {
+
+    // this text would come from an ascii text
+    // println!("{:?}", serde_json::to_string(o_person).unwrap());
+    let b = o_person.s_name.to_lowercase() == v["s_name"].as_str().unwrap();
+    return b;
+}
+fn f_example_3(){
+    let a_s_argument: Vec<String> = env::args().collect();
+    if(a_s_argument.len() != 2 ){
+        eprintln!(r#"a JSON string in format '{{"s_function_name": "...", "object":{{...}}}}' must be passed as the first argument"#);
+        process::exit(1);
+    }
+
+    
+    let s_first_arg = a_s_argument[1].to_owned();
+    // println!("a_s_argument {:?}", a_s_argument);
+    
+    let v: Value = serde_json::from_str(&s_first_arg).unwrap();
+
+
+    let mut a_o_person : Vec<O_person> = vec![];
+    let mut n_i = 0;
+    a_o_person.push(
+        O_person {
+            n_id: n_i, 
+            s_name: String::from("HaLLo")
+        }
+    );
+    a_o_person.push(
+        O_person {
+            n_id: n_i, 
+            s_name: String::from("hallo")
+        }
+    );
+    while(n_i < 100){
+        a_o_person.push(
+            O_person {
+                n_id: n_i, 
+                s_name: String::from("halLO")
+            }
+        );
+        n_i+=1;
+    }
+
+    let mut a_o_person_filtered = vec![];
+    for o_person in a_o_person{
+
+        if(f_b_filter_function(&o_person, &v)){
+            a_o_person_filtered.push(o_person)
+        }
+        
+    }
+
+    let s_json = serde_json::to_string(&a_o_person_filtered).unwrap();
+    println!("a_o_person_filtered: {:?}", s_json);
+
+}
 
 fn f_example_1(){
 
@@ -54,8 +131,6 @@ fn f_example_1(){
         );
         n_i+=1;
     }
-    
-    
     
     
     for o_person in a_o_person{
@@ -136,7 +211,8 @@ fn f_example_1(){
 // }
 
 fn main() {
-    f_example_1();
+    // f_example_1();
     // f_example_2();
+    f_example_3();
 
 }
