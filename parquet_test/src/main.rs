@@ -37,6 +37,12 @@ fn f_example_read_multiple_files(){
         f_print_type_of(&row);
 
         for (n_index, (s_prop_name, value)) in row.get_column_iter().enumerate() {
+
+            if(s_prop_name == "catflags"){
+                if(value >= 1){
+                    //....
+                }
+            }
             println!("n_index: {:?}", n_index);
             println!("s_prop_name: {:?}", s_prop_name);
             println!("value: {:?}", value);
@@ -45,6 +51,7 @@ fn f_example_read_multiple_files(){
         // println!("{}", row["objectid"]);
     }
 }
+
 fn f_example_read_and_write(){
     
     let paths = vec![
@@ -56,12 +63,20 @@ fn f_example_read_and_write(){
         .flat_map(|r| r.into_iter());
 
     for row in rows {
-        f_print_type_of(&row);
-
+        println!("row: {:?}", row);
+        // 
+        // f_print_type_of(&row);
+// 
         for (n_index, (s_prop_name, value)) in row.get_column_iter().enumerate() {
+
+            // s_prop_name "nepochs"
+            // value 1234
+            // n_index 6
+
             println!("n_index: {:?}", n_index);
             println!("s_prop_name: {:?}", s_prop_name);
             println!("value: {:?}", value);
+            //
         }
         // println!("{}", row);
         // println!("{}", row["objectid"]);
