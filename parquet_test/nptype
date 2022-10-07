@@ -1,0 +1,11 @@
+[('objectid', 'i64'),
+ ('filterid', 'u8'),
+ ('fieldid', 'i16'),
+ ('rcid', 'u8'),
+ ('objra', 'f32'),
+ ('objdec', 'f32'),
+ ('nepochs', 'i64'), ('hmjd', 'object'),
+ ('mag', 'object'),
+ ('magerr', 'object'),
+ ('clrcoeff', 'object'),
+ ('catflags', 'object')]
