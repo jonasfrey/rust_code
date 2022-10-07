@@ -351,6 +351,53 @@ fn f_draw_circle(
     }
 
 }
+fn f_a_rect(
+    a_n_u8__image: &mut Vec<u8>,
+    n_vector_pixels_x : u32,
+    n_vector_pixels_y : u32,
+    n_channels: u32,
+    n_position_x : u32,
+    n_position_y : u32,
+    n_rect_size_x : u32,
+    n_rect_size_y : u32,
+){
+
+    let mut a_vec: Vec<u8> = Vec::new();
+
+    let mut n_rgba_value = 0;
+    let mut n_pixel_index = 0;
+    let mut n_x = 0;
+    let mut n_y = 0;
+    let mut n_channel = 0;
+    
+    let n_index_max = a_n_u8_pixel.len()-1;
+
+    while(n_y < n_rect_size_y){
+        n_x = 0;
+        while(n_x < n_rect_size_x){
+            let n_index_pixel = 
+            ((n_position_y + n_y) * n_vector_pixels_x * n_channels) +
+            ((n_position_x + n_x) * n_channels);
+            
+            n_channel = 0;
+            while(n_channel < n_channels){
+                let n_index = (n_index_pixel+n_channel) as usize;
+                if(n_index < 0 || n_index > n_index_max){
+                    n_channel+=1;
+                    continue;
+                }
+                a_vec.push(a_n_u8__image[n_index]);
+                n_channel+=1;
+            }
+            // println!("x|y {:?}|{:?}", n_x, n_y);
+            n_x+=1;
+        }
+        n_y+=1;
+        // println!("x|y {:?}|{:?}", n_x, n_y);
+    }
+
+}
+
 fn f_draw_rect(
     a_n_u8_pixel: &mut Vec<u8>,
     n_vector_pixels_x : u32,
@@ -820,6 +867,23 @@ fn f_generate_labyrinth(
     let n_milliseconds_per_frame = ((1000.0)/n_fps as f32) as u128;
     let n_microseconds_per_frame = ((1000.0*1000.0)/n_fps as f32) as u128;
 
+    let n_i = 0; 
+    while(n_i < n_boxes_x*n_boxes_y){
+        let a_n_u8__subframe = f_a_rect(
+            &a_n_u8__image,
+            o_object_2d_scanner_box.o_translation
+            n_vector_pixels_x : u32,
+            n_vector_pixels_y : u32,
+            n_channels: u32,
+            n_position_x : u32,
+            n_position_y : u32,
+            n_rect_size_x : u32,
+            n_rect_size_y : u32,
+        )
+        
+        
+        n_i+=1;
+    }
     let mut n_frame_id = 0;
     while(n_frame_id < 10000){
         n_frame_id +=1;
