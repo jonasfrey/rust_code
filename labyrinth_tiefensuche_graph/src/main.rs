@@ -38,36 +38,36 @@ struct O_point_2d{
 #[derive(Debug)]
 struct O_spatialproperty{
 
-    o_point_2d_current: O_point_2d, 
-    o_point_2d_velocity: O_point_2d, 
-    o_point_2d_acceleration: O_point_2d,
+    o_point_2d__current: O_point_2d, 
+    o_point_2d__velocity: O_point_2d, 
+    o_point_2d__acceleration: O_point_2d,
 
  }
 
  fn f_calculate_o_spatialproperty(
     o_spatialproperty: &mut O_spatialproperty
  ){
-    o_spatialproperty.o_point_2d_velocity.n_x += o_spatialproperty.o_point_2d_acceleration.n_x;
-    o_spatialproperty.o_point_2d_velocity.n_y += o_spatialproperty.o_point_2d_acceleration.n_y;
+    o_spatialproperty.o_point_2d__velocity.n_x += o_spatialproperty.o_point_2d__acceleration.n_x;
+    o_spatialproperty.o_point_2d__velocity.n_y += o_spatialproperty.o_point_2d__acceleration.n_y;
 
-    o_spatialproperty.o_point_2d_current.n_x += o_spatialproperty.o_point_2d_velocity.n_x;
-    o_spatialproperty.o_point_2d_current.n_y += o_spatialproperty.o_point_2d_velocity.n_y;
+    o_spatialproperty.o_point_2d__current.n_x += o_spatialproperty.o_point_2d__velocity.n_x;
+    o_spatialproperty.o_point_2d__current.n_y += o_spatialproperty.o_point_2d__velocity.n_y;
  }
  #[derive(Debug)]
  struct O_object_2d{
     s_name: String,
-    o_translation: O_spatialproperty,
-    o_rotation: O_spatialproperty,
-    o_scale: O_spatialproperty,
+    o_spatialproperty__translation: O_spatialproperty,
+    o_spatialproperty__rotation: O_spatialproperty,
+    o_spatialproperty__scale: O_spatialproperty,
  }
 
 fn f_calculate_o_object_2d(
     o_object_2d: &mut O_object_2d
 ){
 
-    f_calculate_o_spatialproperty(&mut o_object_2d.o_translation);
-    f_calculate_o_spatialproperty(&mut o_object_2d.o_rotation);
-    f_calculate_o_spatialproperty(&mut o_object_2d.o_scale);
+    f_calculate_o_spatialproperty(&mut o_object_2d.o_spatialproperty__translation);
+    f_calculate_o_spatialproperty(&mut o_object_2d.o_spatialproperty__rotation);
+    f_calculate_o_spatialproperty(&mut o_object_2d.o_spatialproperty__scale);
 }
 
 fn f_a_color_rgba_mixed(
@@ -351,16 +351,17 @@ fn f_draw_circle(
     }
 
 }
-fn f_a_rect(
+fn f_a_rect_read_and_optional_write(
     a_n_u8__image: &mut Vec<u8>,
-    n_vector_pixels_x : u32,
-    n_vector_pixels_y : u32,
-    n_channels: u32,
-    n_position_x : u32,
-    n_position_y : u32,
-    n_rect_size_x : u32,
-    n_rect_size_y : u32,
-){
+    n_image_scale_x : u32,
+    n_image_scale_y : u32,
+    n_image_channels: u32,
+    n_rect_translation_x : u32,
+    n_rect_translation_y : u32,
+    n_rect_scale_x : u32,
+    n_rect_scale_y : u32,
+    a_n_u8__color : Option<&Vec<u8>>
+) -> Vec<u8> {
 
     let mut a_vec: Vec<u8> = Vec::new();
 
@@ -370,21 +371,24 @@ fn f_a_rect(
     let mut n_y = 0;
     let mut n_channel = 0;
     
-    let n_index_max = a_n_u8_pixel.len()-1;
+    let n_index_max = a_n_u8__image.len()-1;
 
-    while(n_y < n_rect_size_y){
+    while(n_y < n_rect_scale_y){
         n_x = 0;
-        while(n_x < n_rect_size_x){
+        while(n_x < n_rect_scale_x){
             let n_index_pixel = 
-            ((n_position_y + n_y) * n_vector_pixels_x * n_channels) +
-            ((n_position_x + n_x) * n_channels);
+            ((n_rect_translation_y + n_y) * n_image_scale_x * n_image_channels) +
+            ((n_rect_translation_x + n_x) * n_image_channels);
             
             n_channel = 0;
-            while(n_channel < n_channels){
+            while(n_channel < n_image_channels){
                 let n_index = (n_index_pixel+n_channel) as usize;
                 if(n_index < 0 || n_index > n_index_max){
                     n_channel+=1;
                     continue;
+                }
+                if(a_n_u8__color.is_none() == false){
+                    a_n_u8__image[n_index] = a_n_u8__color.unwrap()[n_channel as usize];
                 }
                 a_vec.push(a_n_u8__image[n_index]);
                 n_channel+=1;
@@ -395,6 +399,8 @@ fn f_a_rect(
         n_y+=1;
         // println!("x|y {:?}|{:?}", n_x, n_y);
     }
+
+    return a_vec
 
 }
 
@@ -813,20 +819,20 @@ fn f_generate_labyrinth(
     
     let mut o_object_2d_scanner_box = O_object_2d{
         s_name: String::from("scanner_box"),
-        o_translation: O_spatialproperty{
-            o_point_2d_current: O_point_2d{n_x: 0, n_y: 0}, 
-            o_point_2d_velocity: O_point_2d{n_x: 0, n_y: 0}, 
-            o_point_2d_acceleration: O_point_2d{n_x: 0, n_y: 0},
+        o_spatialproperty__translation: O_spatialproperty{
+            o_point_2d__current: O_point_2d{n_x: 0, n_y: 0}, 
+            o_point_2d__velocity: O_point_2d{n_x: 0, n_y: 0}, 
+            o_point_2d__acceleration: O_point_2d{n_x: 0, n_y: 0},
         },
-        o_rotation: O_spatialproperty{
-            o_point_2d_current: O_point_2d{n_x: 0, n_y: 0}, 
-            o_point_2d_velocity: O_point_2d{n_x: 0, n_y: 0}, 
-            o_point_2d_acceleration: O_point_2d{n_x: 0, n_y: 0},
+        o_spatialproperty__rotation: O_spatialproperty{
+            o_point_2d__current: O_point_2d{n_x: 0, n_y: 0}, 
+            o_point_2d__velocity: O_point_2d{n_x: 0, n_y: 0}, 
+            o_point_2d__acceleration: O_point_2d{n_x: 0, n_y: 0},
         },
-        o_scale: O_spatialproperty{
-            o_point_2d_current: O_point_2d{n_x: n_scale_x, n_y: n_scale_y}, 
-            o_point_2d_velocity: O_point_2d{n_x: 0, n_y: 0}, 
-            o_point_2d_acceleration: O_point_2d{n_x: 0, n_y: 0},
+        o_spatialproperty__scale: O_spatialproperty{
+            o_point_2d__current: O_point_2d{n_x: n_scale_x, n_y: n_scale_y}, 
+            o_point_2d__velocity: O_point_2d{n_x: 0, n_y: 0}, 
+            o_point_2d__acceleration: O_point_2d{n_x: 0, n_y: 0},
         },
     };
 
@@ -867,27 +873,30 @@ fn f_generate_labyrinth(
     let n_milliseconds_per_frame = ((1000.0)/n_fps as f32) as u128;
     let n_microseconds_per_frame = ((1000.0*1000.0)/n_fps as f32) as u128;
 
-    let n_i = 0; 
-    while(n_i < n_boxes_x*n_boxes_y){
-        let a_n_u8__subframe = f_a_rect(
-            &a_n_u8__image,
-            o_object_2d_scanner_box.o_translation
-            n_vector_pixels_x : u32,
-            n_vector_pixels_y : u32,
-            n_channels: u32,
-            n_position_x : u32,
-            n_position_y : u32,
-            n_rect_size_x : u32,
-            n_rect_size_y : u32,
-        )
+    // let n_i = 0; 
+    // while(n_i < n_boxes_x*n_boxes_y){
+    //     let a_n_u8__subframe = f_a_rect(
+    //         &a_n_u8__image,
+    //         o_object_2d_scanner_box.o_spatialproperty__translation.n_x,
+    //         o_object_2d_scanner_box.o_spatialproperty__translation.n_y,
+    //         o_object_2d_scanner_box.o_spatialproperty__scale.n_x,
+    //         o_object_2d_scanner_box.o_spatialproperty__scale.n_y,
+    //         4, 
+            
+    //         n_channels: u32,
+    //         n_position_x : u32,
+    //         n_position_y : u32,
+    //         n_rect_size_x : u32,
+    //         n_rect_size_y : u32,
+    //     );
         
         
-        n_i+=1;
-    }
+    //     n_i+=1;
+    // }
     let mut n_frame_id = 0;
     while(n_frame_id < 10000){
         n_frame_id +=1;
-        println!("o_object_2d_scanner_box.o_translation.o_point_2d_current.n_y: {:?}",o_object_2d_scanner_box.o_translation.o_point_2d_current.n_y);
+        println!("o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y: {:?}",o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y);
 
         a_n_u8__image = bytes.iter().cloned().collect();
 
@@ -899,20 +908,20 @@ fn f_generate_labyrinth(
         let n_pixel_pos_x = (n_mouse_x_normalized * n_screen_rect_size_x as f32) as u32;
         let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as u32;
 
-        o_object_2d_scanner_box.o_translation.o_point_2d_current.n_x = n_pixel_pos_x;
-        o_object_2d_scanner_box.o_translation.o_point_2d_current.n_y = n_pixel_pos_y;
+        o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_x = n_pixel_pos_x;
+        o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y = n_pixel_pos_y;
 
-        println!("o_object_2d_scanner_box.o_translation.o_point_2d_current.n_y: {:?}",o_object_2d_scanner_box.o_translation.o_point_2d_current.n_y);
-        f_draw_rect(
+        println!("o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y: {:?}",o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y);
+        f_a_rect_read_and_optional_write(
             &mut a_n_u8__image,
             n_image_pixels_x, 
             n_image_pixels_y, 
             n_channels,
-            o_object_2d_scanner_box.o_translation.o_point_2d_current.n_x,
-            o_object_2d_scanner_box.o_translation.o_point_2d_current.n_y,
-            o_object_2d_scanner_box.o_scale.o_point_2d_current.n_x,
-            o_object_2d_scanner_box.o_scale.o_point_2d_current.n_y,
-            &a_n_u8__rgba_color_red,
+            o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_x,
+            o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y,
+            o_object_2d_scanner_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+            o_object_2d_scanner_box.o_spatialproperty__scale.o_point_2d__current.n_y,
+            Some(&a_n_u8__rgba_color_red),
         );
         o_image = ImageView::new(ImageInfo::rgba8(n_image_pixels_x, n_image_pixels_y), &a_n_u8__image);
         o_window.set_image("image-001", o_image).unwrap();
@@ -933,8 +942,8 @@ fn f_generate_labyrinth(
     //                 let n_pixel_pos_x = (n_mouse_x_normalized * n_screen_rect_size_x as f32) as u32;
     //                 let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as u32;
 
-    //                 o_object_2d_scanner_box.o_translation.o_point_2d_current.n_x = n_pixel_pos_x;
-    //                 o_object_2d_scanner_box.o_translation.o_point_2d_current.n_y = n_pixel_pos_y;
+    //                 o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_x = n_pixel_pos_x;
+    //                 o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y = n_pixel_pos_y;
 
     //                 n_ts_ms_now = o_inst_now.elapsed().as_millis();
     //                 n_ts_ms_delta = n_ts_ms_now - n_ts_ms_last;
