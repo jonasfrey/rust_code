@@ -414,7 +414,6 @@ async fn main(){
                 o_text_png_color
             ).unwrap();
     
-            let s_path_image_text = vec![s_name_file_without_extension.clone(), String::from("_o_text"), String::from(n_index.to_string()), s_outpupt_file_extension.clone()].join("");
             // "o_text_png.png";
             let mut o_file = File::create(s_path_image_text.clone()).unwrap();
             let a: &[u8] = &o_text_png.data;
@@ -428,7 +427,9 @@ async fn main(){
                 n_overlay_translation_y + (n_index as u32 * o_image_text.height()) as i64
             );
             println!("n_overlay_translation_y + (n_index as u32 * o_image_text.height()) as i64 {:?}", n_overlay_translation_y + (n_index as u32 * o_image_text.height()) as i64);
-            o_image_text_with_bg.save(vec![s_name_file_without_extension.clone(), String::from("_o_image_text_with_bg"), s_outpupt_file_extension.clone()].join("")).unwrap();
+            
+            // let s_path_image_text = vec![s_name_file_without_extension.clone(), String::from("_o_text"), String::from(n_index.to_string()), s_outpupt_file_extension.clone()].join("");
+            // o_image_text_with_bg.save(vec![s_name_file_without_extension.clone(), String::from("_o_image_text_with_bg"), s_outpupt_file_extension.clone()].join("")).unwrap();
 
         }
 
