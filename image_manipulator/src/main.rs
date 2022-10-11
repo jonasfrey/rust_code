@@ -104,6 +104,41 @@ async fn main(){
             // std::process::exit(1);
         }
 
+        let mut n_scale_x_evaluated = 0 as f64; 
+        if(o_manipulation["s_scale_x"]!= serde_json::Value::Null){
+            let mut s_expression = String::from(o_manipulation["s_scale_x"].as_str().unwrap());
+            for (n_index, s_path_file) in a_s_path_file.clone().iter().enumerate(){
+                let mut s = vec![String::from(s_path_file.clone()), String::from(".n_scale_x")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_x[n_index as usize].to_string())[..]);
+                // println!("replacing {:?} with {:?}", s, &(a_n_scale_x[n_index as usize].to_string()));
+                s = vec![String::from(s_path_file.clone()), String::from(".n_scale_y")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_y[n_index as usize].to_string())[..]);
+
+            }
+            
+            let mut o_expr = Expr::new(String::from(s_expression.clone()));
+            // println!("s_expression {:?}", s_expression.clone());
+            n_scale_x_evaluated = o_expr.exec().unwrap().as_f64().unwrap();
+            // println!("n_scale_x_evaluated {:?}", n_scale_x_evaluated);
+            // std::process::exit(1);
+        }
+        let mut n_scale_y_evaluated = 0 as f64;
+        if(o_manipulation["s_scale_y"]!= serde_json::Value::Null){
+            let mut s_expression = String::from(o_manipulation["s_scale_y"].as_str().unwrap());
+            for (n_index, s_path_file) in a_s_path_file.clone().iter().enumerate(){
+                let mut s = vec![String::from(s_path_file.clone()), String::from(".n_scale_x")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_y[n_index as usize].to_string())[..]);
+                // println!("replacing {:?} with {:?}", s, &(a_n_scale_y[n_index as usize].to_string()));
+                s = vec![String::from(s_path_file.clone()), String::from(".n_scale_y")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_y[n_index as usize].to_string())[..]);
+            }
+            
+            let mut o_expr = Expr::new(String::from(s_expression.clone()));
+            // println!("s_expression {:?}", s_expression.clone());
+            n_scale_y_evaluated = o_expr.exec().unwrap().as_f64().unwrap();
+            // println!("n_scale_y_evaluated {:?}", n_scale_y_evaluated);
+            // std::process::exit(1);
+        }
 
 
 
@@ -113,8 +148,8 @@ async fn main(){
             o_image_output = image::DynamicImage::ImageRgba8(
                 image::imageops::resize(
                     &mut o_image_input,
-                    o_manipulation["n_scale_x"].as_u64().unwrap() as u32, 
-                    o_manipulation["n_scale_y"].as_u64().unwrap() as u32,
+                    n_scale_x_evaluated as u32, 
+                    n_scale_y_evaluated as u32,
                     image::imageops::FilterType::Nearest,
                     // image::imageops::FilterType::Triangle,
                     // image::imageops::FilterType::CatmullRom,
@@ -143,8 +178,8 @@ async fn main(){
                     &mut o_image_input,
                     n_translation_x_evaluated as u32,
                     n_translation_y_evaluated as u32, 
-                    o_manipulation["n_scale_x"].as_i64().unwrap().try_into().unwrap(),
-                    o_manipulation["n_scale_y"].as_i64().unwrap().try_into().unwrap(),
+                    n_scale_x_evaluated as u32, 
+                    n_scale_y_evaluated as u32,
                 ).to_image()
             );
         }
