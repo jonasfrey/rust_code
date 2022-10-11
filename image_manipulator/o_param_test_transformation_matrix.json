@@ -1,0 +1,48 @@
+{
+    "a_o_manipulation": [
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "transformation_matrix",
+            "a_a_n": [
+                [-1,0],
+                [0,-1]
+            ],
+            "n_translation_x": 256,
+            "n_translation_y": 256,
+            "s_path_image_output": "default_transformation_matrix.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "transformation_matrix",
+            "a_a_n": [
+                [-1,0.4],
+                [0,-1]
+            ],
+            "n_translation_x": 256,
+            "n_translation_y": 256,
+            "s_path_image_output": "default_transformation_matrix_shear_in_x_direction.png"
+        },
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "transformation_matrix",
+            "a_a_n": [
+                [2,0],
+                [0,2]
+            ],
+            "n_translation_x": 256,
+            "n_translation_y": 256,
+            "s_path_image_output": "default_transformation_matrix_scale_x_and_y.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "transformation_matrix",
+            "a_a_n": [
+                [-0.5,0],
+                [0,-0.5]
+            ],
+            "n_translation_x": 256,
+            "n_translation_y": 256,
+            "s_path_image_output": "default_transformation_matrix_combined_scale_and_flipped.png"
+        }
+    ]
+}

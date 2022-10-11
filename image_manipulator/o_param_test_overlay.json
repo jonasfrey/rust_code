@@ -1,0 +1,49 @@
+{
+    "a_o_manipulation": [
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "resize",
+            "n_scale_x": 300, 
+            "n_scale_y": 300,
+            "s_path_image_output": "default_rescaled.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "overlay",
+            "s_path_image_foreground": "default_rescaled.png",
+            "n_translation_x": 0,
+            "n_translation_y": 0,
+            "s_path_image_output": "default_overlayed.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "resize",
+            "n_scale_x": 200,
+            "n_scale_y": 200,
+            "s_path_image_output": "default_rescaled.png"
+        }, 
+        {
+            "s_path_image_input": "default_overlayed.png",
+            "s_operation_name": "overlay",
+            "s_path_image_foreground": "default_rescaled.png",
+            "n_translation_x": 0,
+            "n_translation_y": 0,
+            "s_path_image_output": "default_overlayed.png"
+        },
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "resize",
+            "n_scale_x": 100, 
+            "n_scale_y": 100,
+            "s_path_image_output": "default_rescaled.png"
+        }, 
+        {
+            "s_path_image_input": "default_overlayed.png",
+            "s_operation_name": "overlay",
+            "s_path_image_foreground": "default_rescaled.png",
+            "n_translation_x": 0,
+            "n_translation_y": 0,
+            "s_path_image_output": "default_overlayed.png"
+        }
+    ]
+}

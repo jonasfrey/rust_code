@@ -1,0 +1,16 @@
+{
+    "a_o_manipulation": [
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "flip",
+            "s_axis": "x",
+            "s_path_image_output": "default_flipped_x.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "flip",
+            "s_axis": "y",
+            "s_path_image_output": "default_flipped_y.png"
+        }
+    ]
+}

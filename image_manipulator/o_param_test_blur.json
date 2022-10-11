@@ -1,0 +1,23 @@
+{
+    "a_o_manipulation": [
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "blur",
+            "n_float_blur_sigma": 10.0,
+            "s_path_image_output": "default_blurred_10.png"
+        },
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "blur",
+            "n_float_blur_sigma": 100.0,
+            "s_path_image_output": "default_blurred_100.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "blur",
+            "n_float_blur_sigma": 50.0,
+            "s_path_image_output": "default_blurred_50.png"
+        }
+
+    ]
+}
