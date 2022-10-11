@@ -11,8 +11,8 @@
             "s_path_image_input": "default.png",
             "s_operation_name": "overlay",
             "s_path_image_foreground": "default_rescaled.png",
-            "n_translation_x": 0,
-            "n_translation_y": 0,
+            "s_translation_x": "(default.png.n_scale_x /2)- (default_rescaled.png.n_scale_x/2)",
+            "s_translation_y": "(default.png.n_scale_y /2)- (default_rescaled.png.n_scale_y/2)",
             "s_path_image_output": "default_overlayed.png"
         }, 
         {
@@ -26,8 +26,8 @@
             "s_path_image_input": "default_overlayed.png",
             "s_operation_name": "overlay",
             "s_path_image_foreground": "default_rescaled.png",
-            "n_translation_x": 0,
-            "n_translation_y": 0,
+            "s_translation_x": "(default.png.n_scale_x /2)- (default_rescaled.png.n_scale_x/2)",
+            "s_translation_y": "(default.png.n_scale_y /2)- (default_rescaled.png.n_scale_y/2)",
             "s_path_image_output": "default_overlayed.png"
         },
         {
@@ -41,8 +41,53 @@
             "s_path_image_input": "default_overlayed.png",
             "s_operation_name": "overlay",
             "s_path_image_foreground": "default_rescaled.png",
-            "n_translation_x": 0,
-            "n_translation_y": 0,
+            "s_translation_x": "(default.png.n_scale_x /2)- (default_rescaled.png.n_scale_x/2)",
+            "s_translation_y": "(default.png.n_scale_y /2)- (default_rescaled.png.n_scale_y/2)",
+            "s_path_image_output": "default_overlayed.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "resize",
+            "n_scale_x": 50, 
+            "n_scale_y": 50,
+            "s_path_image_output": "default_rescaled.png"
+        }, 
+        {
+            "s_path_image_input": "default_overlayed.png",
+            "s_operation_name": "overlay",
+            "s_path_image_foreground": "default_rescaled.png",
+            "s_translation_x": "(default.png.n_scale_x /2)- (default_rescaled.png.n_scale_x/2)",
+            "s_translation_y": "(default.png.n_scale_y /2)- (default_rescaled.png.n_scale_y/2)",
+            "s_path_image_output": "default_overlayed.png"
+        },
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "resize",
+            "n_scale_x": 20, 
+            "n_scale_y": 20,
+            "s_path_image_output": "default_rescaled.png"
+        }, 
+        {
+            "s_path_image_input": "default_overlayed.png",
+            "s_operation_name": "overlay",
+            "s_path_image_foreground": "default_rescaled.png",
+            "s_translation_x": "(default.png.n_scale_x /2)- (default_rescaled.png.n_scale_x/2)",
+            "s_translation_y": "(default.png.n_scale_y /2)- (default_rescaled.png.n_scale_y/2)",
+            "s_path_image_output": "default_overlayed.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "resize",
+            "n_scale_x": 10, 
+            "n_scale_y": 10,
+            "s_path_image_output": "default_rescaled.png"
+        }, 
+        {
+            "s_path_image_input": "default_overlayed.png",
+            "s_operation_name": "overlay",
+            "s_path_image_foreground": "default_rescaled.png",
+            "s_translation_x": "(default.png.n_scale_x /2)- (default_rescaled.png.n_scale_x/2)",
+            "s_translation_y": "(default.png.n_scale_y /2)- (default_rescaled.png.n_scale_y/2)",
             "s_path_image_output": "default_overlayed.png"
         }
     ]

@@ -1,0 +1,25 @@
+{
+    "a_o_manipulation": [
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "blur",
+            "n_float_blur_sigma": 100.0,
+            "s_path_image_output": "default_example_blurred_100.png"
+        }, 
+        {
+            "s_path_image_input": "default.png",
+            "s_operation_name": "resize",
+            "n_scale_x": 300, 
+            "n_scale_y": 300,
+            "s_path_image_output": "default_example_rescaled.png"
+        },
+        {
+            "s_path_image_input": "default_example_blurred_100.png",
+            "s_operation_name": "overlay",
+            "s_path_image_foreground": "default_example_rescaled.png",
+            "s_translation_x": "((default.png.n_scale_x / 2.0) - (default_example_rescaled.png.n_scale_x /2.0) )",
+            "s_translation_y": "((default.png.n_scale_y / 2.0) - (default_example_rescaled.png.n_scale_y /2.0) )",
+            "s_path_image_output": "default_example_overlayed.png"
+        }
+    ]
+}

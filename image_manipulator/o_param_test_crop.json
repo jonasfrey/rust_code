@@ -5,8 +5,8 @@
             "s_operation_name": "crop",
             "n_scale_x": 512, 
             "n_scale_y": 100,
-            "n_translation_x": 0, 
-            "n_translation_y": 0,
+            "s_translation_x": "0", 
+            "s_translation_y": "0",
             "s_path_image_output": "default_cropped.png"
         }, 
         {
@@ -14,8 +14,8 @@
             "s_operation_name": "crop",
             "n_scale_x": 200, 
             "n_scale_y": 200,
-            "n_translation_x": 490, 
-            "n_translation_y": 490,
+            "s_translation_x": "490", 
+            "s_translation_y": "490",
             "s_path_image_output": "default_cropped2.png"
         }
     ]

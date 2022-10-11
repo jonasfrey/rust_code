@@ -10,16 +10,16 @@
             "s_path_image_input": "default.png",
             "s_operation_name": "rotate",
             "n_rotation_normalized": 0.25,
-            "n_translation_x": 256,
-            "n_translation_y": 256,
+            "s_translation_x": "256",
+            "s_translation_y": "256",
             "s_path_image_output": "default_rotated_0_25.png"
         },
         {
             "s_path_image_input": "default.png",
             "s_operation_name": "rotate",
             "n_rotation_normalized": 0.05,
-            "n_translation_x": 256,
-            "n_translation_y": 256,
+            "s_translation_x": "256",
+            "s_translation_y": "256",
             "s_path_image_output": "default_rotated_0_25.png"
         }
     ]

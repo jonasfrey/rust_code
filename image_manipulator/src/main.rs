@@ -11,6 +11,9 @@ use image::{ImageBuffer, Rgba, RgbaImage};
 use std::process;
 use std::io::Read;
 use std::io;
+use eval::{Expr, to_value};
+use std::collections::HashMap;
+
 
 // use woff2::decode::{convert_woff2_to_ttf, is_woff2};
 
@@ -30,6 +33,7 @@ async fn main(){
     // translation == position, a fixed point somewhere
     // rotation == rotation
 
+
     let a_s_arg: Vec<String> = env::args().collect();
     let mut s_first_arg = a_s_arg[1].to_owned();
     println!("s_first_arg {:?}", s_first_arg);
@@ -40,9 +44,69 @@ async fn main(){
 
     let a_o_manipulation = o_param["a_o_manipulation"].as_array().unwrap();
     let mut n_i_a_o_manipulation = 0; 
+    let mut a_s_path_file : Vec<String> = Vec::new();
+    let mut a_n_scale_x : Vec<f64> = Vec::new();
+    let mut a_n_scale_y : Vec<f64> = Vec::new();
+
     while(n_i_a_o_manipulation < a_o_manipulation.len()){
         let o_manipulation = &a_o_manipulation[n_i_a_o_manipulation];
-        let mut o_image_input = ImageReader::open(o_manipulation["s_path_image_input"].as_str().unwrap()).unwrap().decode().unwrap();
+        let mut s_path_image_input = o_manipulation["s_path_image_input"].as_str().unwrap();
+        let mut o_image_input = ImageReader::open(s_path_image_input).unwrap().decode().unwrap();
+        let mut n_index_a_s_path_file = a_s_path_file.iter().position(|s| s == s_path_image_input);
+        if(n_index_a_s_path_file == None){
+            // println!("n_index_a_s_path_file {:?}", n_index_a_s_path_file);
+            a_s_path_file.push(String::from(s_path_image_input));
+            a_n_scale_x.push(o_image_input.width() as f64);
+            a_n_scale_y.push(o_image_input.height() as f64);
+            n_index_a_s_path_file = Some((a_s_path_file.len()-1) as usize);
+        }else{
+            n_index_a_s_path_file = Some(n_index_a_s_path_file.unwrap() as usize);
+            a_s_path_file[n_index_a_s_path_file.unwrap()] = String::from(s_path_image_input);
+            a_n_scale_x[n_index_a_s_path_file.unwrap()] = (o_image_input.width() as f64);
+            a_n_scale_y[n_index_a_s_path_file.unwrap()] = (o_image_input.height() as f64);
+        }
+
+        println!("a_s_path_file {:?}", a_s_path_file);
+
+        let mut n_translation_x_evaluated = 0 as f64; 
+        if(o_manipulation["s_translation_x"]!= serde_json::Value::Null){
+            let mut s_expression = String::from(o_manipulation["s_translation_x"].as_str().unwrap());
+            for (n_index, s_path_file) in a_s_path_file.clone().iter().enumerate(){
+                let mut s = vec![String::from(s_path_file.clone()), String::from(".n_scale_x")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_x[n_index as usize].to_string())[..]);
+                // println!("replacing {:?} with {:?}", s, &(a_n_scale_x[n_index as usize].to_string()));
+                s = vec![String::from(s_path_file.clone()), String::from(".n_scale_y")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_y[n_index as usize].to_string())[..]);
+
+            }
+            
+            let mut o_expr = Expr::new(String::from(s_expression.clone()));
+            // println!("s_expression {:?}", s_expression.clone());
+            n_translation_x_evaluated = o_expr.exec().unwrap().as_f64().unwrap();
+            // println!("n_translation_x_evaluated {:?}", n_translation_x_evaluated);
+            // std::process::exit(1);
+        }
+        let mut n_translation_y_evaluated = 0 as f64;
+        if(o_manipulation["s_translation_y"]!= serde_json::Value::Null){
+            let mut s_expression = String::from(o_manipulation["s_translation_y"].as_str().unwrap());
+            for (n_index, s_path_file) in a_s_path_file.clone().iter().enumerate(){
+                let mut s = vec![String::from(s_path_file.clone()), String::from(".n_scale_x")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_y[n_index as usize].to_string())[..]);
+                // println!("replacing {:?} with {:?}", s, &(a_n_scale_y[n_index as usize].to_string()));
+                s = vec![String::from(s_path_file.clone()), String::from(".n_scale_y")].join("");
+                s_expression = s_expression.replace(&s[..], &(a_n_scale_y[n_index as usize].to_string())[..]);
+            }
+            
+            let mut o_expr = Expr::new(String::from(s_expression.clone()));
+            // println!("s_expression {:?}", s_expression.clone());
+            n_translation_y_evaluated = o_expr.exec().unwrap().as_f64().unwrap();
+            // println!("n_translation_y_evaluated {:?}", n_translation_y_evaluated);
+            // std::process::exit(1);
+        }
+
+
+
+
         let mut o_image_output = o_image_input.clone();
         if(o_manipulation["s_operation_name"].as_str().unwrap() == "resize"){
 
@@ -67,8 +131,8 @@ async fn main(){
             image::imageops::overlay(
                 &mut o_image_output,
                 &o_image_foreground,
-                o_manipulation["n_translation_x"].as_i64().unwrap() as i64, 
-                o_manipulation["n_translation_y"].as_i64().unwrap() as i64
+                n_translation_x_evaluated as i64, 
+                n_translation_y_evaluated as i64
             );
         }
 
@@ -77,8 +141,8 @@ async fn main(){
             o_image_output = image::DynamicImage::ImageRgba8(
                 image::imageops::crop(
                     &mut o_image_input,
-                    o_manipulation["n_translation_x"].as_i64().unwrap().try_into().unwrap(),
-                    o_manipulation["n_translation_y"].as_i64().unwrap().try_into().unwrap(), 
+                    n_translation_x_evaluated as u32,
+                    n_translation_y_evaluated as u32, 
                     o_manipulation["n_scale_x"].as_i64().unwrap().try_into().unwrap(),
                     o_manipulation["n_scale_y"].as_i64().unwrap().try_into().unwrap(),
                 ).to_image()
@@ -105,14 +169,9 @@ async fn main(){
             let mut n_cos = (std::f64::consts::TAU * n_rotation_normalized).cos();
             let mut n_sin = (std::f64::consts::TAU * n_rotation_normalized).sin();
 
-            let mut n_translation_x = 0 as f64; 
-            if(o_manipulation["n_translation_x"]!= serde_json::Value::Null){
-                n_translation_x = (o_manipulation["n_translation_x"].as_f64().unwrap())
-            }
-            let mut n_translation_y = 0 as f64; 
-            if(o_manipulation["n_translation_y"]!= serde_json::Value::Null){
-                n_translation_y = (o_manipulation["n_translation_y"].as_f64().unwrap())
-            }
+
+            let mut n_translation_x = n_translation_x_evaluated;
+            let mut n_translation_y = n_translation_y_evaluated;
 
             for n_y in 0..n_o_image_input_scale_x{
                 for n_x in 0..n_o_image_input_scale_y {
@@ -214,14 +273,10 @@ async fn main(){
                 n_o_image_input_scale_x,
                 n_o_image_input_scale_y
             );
-            let mut n_translation_x = 0 as f64; 
-            if(o_manipulation["n_translation_x"]!= serde_json::Value::Null){
-                n_translation_x = (o_manipulation["n_translation_x"].as_f64().unwrap())
-            }
-            let mut n_translation_y = 0 as f64; 
-            if(o_manipulation["n_translation_y"]!= serde_json::Value::Null){
-                n_translation_y = (o_manipulation["n_translation_y"].as_f64().unwrap())
-            }
+
+
+            let mut n_translation_x = n_translation_x_evaluated;
+            let mut n_translation_y = n_translation_y_evaluated;
 
             let mut a_n_f64_x : Vec<f64> = vec![
                 o_manipulation["a_a_n"].as_array().unwrap()[0].as_array().unwrap()[0].as_f64().unwrap(),
@@ -267,7 +322,24 @@ async fn main(){
         }   
         
         o_image_output.save(o_manipulation["s_path_image_output"].as_str().unwrap()).unwrap();
-        
+
+        let mut s_path_image_output = o_manipulation["s_path_image_output"].as_str().unwrap();
+        let mut n_index_a_s_path_file = a_s_path_file.iter().position(|s| s == s_path_image_output);
+        if(n_index_a_s_path_file == None){
+            // println!("n_index_a_s_path_file {:?}", n_index_a_s_path_file);
+            a_s_path_file.push(String::from(s_path_image_output));
+            a_n_scale_x.push(o_image_output.width() as f64);
+            a_n_scale_y.push(o_image_output.height() as f64);
+            n_index_a_s_path_file = Some((a_s_path_file.len()-1) as usize);
+        }else{
+            n_index_a_s_path_file = Some(n_index_a_s_path_file.unwrap() as usize);
+            a_s_path_file[n_index_a_s_path_file.unwrap()] = String::from(s_path_image_output);
+            a_n_scale_x[n_index_a_s_path_file.unwrap()] = (o_image_output.width() as f64);
+            a_n_scale_y[n_index_a_s_path_file.unwrap()] = (o_image_output.height() as f64);
+        }
+
+        // println!("a_n_scale_x {:?}", a_n_scale_x);
+        // println!("o_image_output.width() {:?}", o_image_output.width());
         n_i_a_o_manipulation+=1;
     }
 
