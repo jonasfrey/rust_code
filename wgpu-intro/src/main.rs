@@ -56,7 +56,7 @@ let mut red_inc = 0.0; // New
                 });
      
                 {
-                    n_i+=1;
+                    // n_i+=1;
 
                     let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: Some("Render Pass"),
@@ -77,9 +77,7 @@ let mut red_inc = 0.0; // New
                     });
                 }
      
-                // submit will accept anything that implements IntoIter
-                queue.submit(std::iter::once(encoder.finish()));
-                output.present();
+
 
                 // New
                 blue_value += (red_inc as f64) * 0.001;
@@ -90,6 +88,9 @@ let mut red_inc = 0.0; // New
                     blue_inc = 1.0;
                     blue_value = 0.0;
                 }
+                                // submit will accept anything that implements IntoIter
+                                queue.submit(std::iter::once(encoder.finish()));
+                                output.present();
               },
             // New
             Event::MainEventsCleared => {
