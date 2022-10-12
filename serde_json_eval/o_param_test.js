@@ -1,7 +1,7 @@
 var o_param_json_complex = {
     "a_o":[
         {
-            ":s_evaluate_me": "1+1"
+            "n": 10
         },
         // this object will be a_o[-1]
         {
@@ -14,8 +14,20 @@ var o_param_json_complex = {
         },
         //
         {
-            ":s_evaluate_me": "a_o[-1]+5"
+            ":s_one_plus_last": "o.a_o[0].n + 1"
+        },
+        {
+            ":s_n": "o.a_o[1].n_one_plus_last + 5"
         }
+        // {
+        //     "n": 10, 
+        //     ":s_evaluate_me": "a_o[0].n_evaluate_me+5"
+        // }, 
+        // {
+        //     "n": 10, 
+        //     ":s_sum": "a_o[0].n_evaluate_me + a_o[1].n + a_o[2].n"
+        // }, 
+
     ]
 }
 var o_param_json_simple = {
@@ -39,8 +51,8 @@ var o_param_json_simple = {
     ]
 }
 
-// var o_param_json = o_param_json_complex;
-var o_param_json = o_param_json_simple;
+var o_param_json = o_param_json_complex;
+// var o_param_json = o_param_json_simple;
 
 var s_path_file = import.meta.url.split("/").pop().split(".").slice(0,-1).join(".") + ".json";
 

@@ -1,1 +1,1 @@
-{"a_o":[{":s_evaluate_me":"1+1"},{":s_evaluate_me":"2*3"}]}
+{"a_o":[{"n":10},{":s_one_plus_last":"o.a_o[0].n + 1"},{":s_n":"o.a_o[1].n_one_plus_last + 5"}]}
