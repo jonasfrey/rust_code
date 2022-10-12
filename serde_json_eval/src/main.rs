@@ -20,7 +20,49 @@ fn f_json_to_hashmap(json: &str, keys: Vec<&str>) -> Result<HashMap<String, Valu
     Ok(map)
 }
 
-fn main() {
+fn f_eval_with_context(){
+
+    let a_s_arg: Vec<String> = env::args().collect();
+
+    let mut s_first_arg = a_s_arg[1].to_owned();
+    
+    println!("s_first_arg {:?}", s_first_arg);
+
+    println!("s_first_arg {}", s_first_arg);
+    let o_param: Value = serde_json::from_str(&s_first_arg).unwrap();
+    println!("o_param {:?}", o_param);
+
+
+
+    let s_o_test = r#"
+    {
+        "n_i":11235, 
+        "o":{"o":{"n":5}}
+    }"#;
+
+    // Parse the string of data into serde_json::Value.
+    let o_test: Value = serde_json::from_str(s_o_test).unwrap();
+
+    let mut object = HashMap::new();
+    // object.insert("foos", vec!["Hello", "world", "!"]);
+    object.insert("test_object", o_test.as_object().unwrap());
+
+    let value = Expr::new(
+        // "object.foos[2-1] == 'world'"
+        // "o.n_i * o.n_i"
+        "o.o.o.n * o.o.o.n"
+    ) // Access field `foos` and index `2-1`
+                // .value("o", o)
+                .value("o", o_test)
+                .exec();
+
+    println!("value {:?}", value);
+
+}
+
+
+
+fn f_iterate_json_prop_names(){
 
     let a_s_arg: Vec<String> = env::args().collect();
     let mut s_first_arg = a_s_arg[1].to_owned();
@@ -52,5 +94,11 @@ fn main() {
     // for value in a_o{
     //     println!("value {:?}\n", value);
     // }
+
+}
+fn main() {
+
+    // f_iterate_json_prop_names();
+    f_eval_with_context();
 
 }
