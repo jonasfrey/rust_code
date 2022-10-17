@@ -59,7 +59,6 @@ struct O_spatialproperty{
     o_spatialproperty__translation: O_spatialproperty,
     o_spatialproperty__rotation: O_spatialproperty,
     o_spatialproperty__scale: O_spatialproperty,
-    a_n_f64__color: Vec<f64>
  }
 
 fn f_calculate_o_object_2d(
@@ -207,27 +206,27 @@ fn f_draw_char(
     // let n_char = s_char.as_bytes()[0];
     // println!("nchar {:?}", n_char);
     let n_char_index = n_char - 32;
-    let n_size_x_char = constants_chars_a_u8::a_n_size_x[n_char_index as usize] as f32;
-    let n_size_y_char = constants_chars_a_u8::a_n_size_y[n_char_index as usize] as f32;
+    let n_size_x_char = constants_chars_a_u8::a_n_size_x[n_char_index as usize] as f64;
+    let n_size_y_char = constants_chars_a_u8::a_n_size_y[n_char_index as usize] as f64;
     let n_channels_char = constants_chars_a_u8::n_channels as u32;
     let n_char_start_index = constants_chars_a_u8::a_n_start_index_chars_information[n_char_index as usize] as usize;
     
-    let mut n_x = 0 as f32; 
-    let mut n_y = 0 as f32; 
-    let mut n_x_normalized = 0 as f32;
-    let mut n_y_normalized = 0 as f32;
+    let mut n_x = 0; 
+    let mut n_y = 0; 
+    let mut n_x_normalized = 0 as f64;
+    let mut n_y_normalized = 0 as f64;
 
-    let mut n_x_char = 0 as f32;
-    let mut n_y_char = 0 as f32;
+    let mut n_x_char = 0 as f64;
+    let mut n_y_char = 0 as f64;
 
     let mut n_channel = 0;
     let n_char_target_channel_index = 0;
-    while(n_x < (n_size_x_char * n_font_size_scale)){
-        n_x_normalized = n_x / (n_size_x_char * n_font_size_scale);
+    while(n_x < (n_size_x_char * n_font_size_scale as f64) as u64){
+        n_x_normalized = n_x as f64 / (n_size_x_char * n_font_size_scale as f64);
         n_x_char = n_x_normalized * n_size_x_char;
         n_y = 0.0;
-        while(n_y < (n_size_y_char * n_font_size_scale)){
-            n_y_normalized = n_y / (n_size_y_char * n_font_size_scale);
+        while(n_y < (n_size_y_char * n_font_size_scale as f64) as u64){
+            n_y_normalized = n_y as f64 / (n_size_y_char * n_font_size_scale as f64);
             n_y_char = n_y_normalized * n_size_y_char;
 
             // println!("n_pixel_index :{:?}", n_pixel_index);
@@ -272,10 +271,10 @@ fn f_draw_char(
 
             
 
-            n_y+=1.0;
+            n_y+=1;
         }
 
-        n_x+=1.0;
+        n_x+=1;
     }
 }
 
@@ -352,7 +351,6 @@ fn f_draw_circle(
     }
 
 }
-
 fn f_a_rect_read_and_optional_write(
     a_n_u8__image: &mut Vec<u8>,
     n_image_scale_x : u32,
@@ -362,7 +360,7 @@ fn f_a_rect_read_and_optional_write(
     n_rect_translation_y : u32,
     n_rect_scale_x : u32,
     n_rect_scale_y : u32,
-    a_n_f64__color : Option<&Vec<f64>>
+    a_n_u8__color : Option<&Vec<u8>>
 ) -> Vec<u8> {
 
     let mut a_vec: Vec<u8> = Vec::new();
@@ -389,8 +387,8 @@ fn f_a_rect_read_and_optional_write(
                     n_channel+=1;
                     continue;
                 }
-                if(a_n_f64__color.is_none() == false){
-                    a_n_u8__image[n_index as usize] = (a_n_f64__color.unwrap()[n_channel as usize] * u8::MAX as f64) as u8;
+                if(a_n_u8__color.is_none() == false){
+                    a_n_u8__image[n_index as usize] = a_n_u8__color.unwrap()[n_channel as usize];
                 }
                 a_vec.push(a_n_u8__image[n_index as usize]);
                 n_channel+=1;
@@ -436,7 +434,7 @@ fn f_draw_rect(
             n_channel = 0;
             while(n_channel < n_channels){
                 let n_index = (n_index_pixel+n_channel) as usize;
-                if(n_index < 0 || n_index > n_index_max){
+                if(n_index < 0 || n_index > n_index_max.try_into().unwrap()){
                     n_channel+=1;
                     continue;
                 }
@@ -480,265 +478,8 @@ fn f_draw_rect(
 
 #[show_image::main]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    f_generate_labyrinth();
 
-    let n_screen_rect_size_x = 1920;
-    let n_screen_rect_size_y = 1080;
-
-    // println!("o{:?}", o_object_2d.s_name);
-
-    // The decoder is a build for reader and can be used to set various decoding options
-    // via `Transformations`. The default output transformation is `Transformations::IDENTITY`.
-    let decoder = png::Decoder::new(File::open("./labyrinth_contrast.png").unwrap());
-    let mut reader = decoder.read_info().unwrap();
-    // Allocate the output buffer.
-    let mut buf = vec![0; reader.output_buffer_size()];
-    // Read the next frame. An APNG might contain multiple frames.
-    let info = reader.next_frame(&mut buf).unwrap();
-    // Grab the bytes of the image.
-    let bytes = &buf[..info.buffer_size()];
-    // Inspect more details of the last read frame.
-    // let in_animation = reader.info().frame_control.is_some();
-
-
-    let n_channels: u32 = 4;
-    // let mut a_n_u8__image = vec![0; (n_image_pixels_x * n_image_pixels_y * n_channels).try_into().unwrap()];
-    // let a_n_u8_pixel : [u8; n_pixels_x * n_pixels_y] = [222];
-    let mut a_n_u8__image: Vec<u8> = bytes.iter().cloned().collect();
-
-
-    println!("a : {:?}", info);
-    let mut a_o_object_2d: Vec<O_object_2d> = Vec::new(); 
-    let n_image_pixels_x = info.width; 
-    let n_image_pixels_y = info.height; 
-    
-    let mut a_n_u8__rgba_color_red = vec![255,0,0,255];
-    //      a_
-    //      ^ array
-    //      ..n_u8__
-    //        ^number as item
-    //      ......__rgba_color_red
-    //              ^ descriptive name of the array
-
-    let mut o_image = ImageView::new(ImageInfo::rgba8(n_image_pixels_x, n_image_pixels_y), &a_n_u8__image); 
-    let o_window = create_window("image", Default::default()).unwrap();
-    o_window.set_image("image-001", o_image).unwrap();
-    
-    let mut a_inner_size = o_window.run_function_wait(|o_window| o_window.inner_size()).unwrap();
-    let mut n_window_size_x = a_inner_size[0];
-    let mut n_window_size_y = a_inner_size[1];
-   
-    let mut b_mouse_down = false;
-
-
-    let o_inst_now = Instant::now();
-    let mut n_ts_ms_now = o_inst_now.elapsed().as_millis();
-    let mut n_ts_ms_last = o_inst_now.elapsed().as_millis();
-    let mut n_ts_ms_delta = o_inst_now.elapsed().as_millis();
-
-    let n_fps = 60; 
-    let n_milliseconds_per_frame = ((1000.0)/n_fps as f32) as u128;
-    let n_microseconds_per_frame = ((1000.0*1000.0)/n_fps as f32) as u128;
-
-
-
-    let n_boxes_x = 32; 
-    let n_boxes_y = 20;
-    
-    let n_scale_x = (n_image_pixels_x as f32/ n_boxes_x as f32) as f64;
-    let n_scale_y = (n_image_pixels_y as f32/ n_boxes_y as f32) as f64;
-
-    let mut o_object_2d_scanner_box = O_object_2d{
-        s_name: String::from("scanner_box"),
-        o_spatialproperty__translation: O_spatialproperty{
-            o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-        },
-        o_spatialproperty__rotation: O_spatialproperty{
-            o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-        },
-        o_spatialproperty__scale: O_spatialproperty{
-            o_point_2d__current: O_point_2d{n_x: 10.0, n_y: 10.0}, 
-            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-        },
-        a_n_f64__color: vec![0.0,0.0,0.0,1.0]
-    };
-
-    a_o_object_2d.push(o_object_2d_scanner_box);
-    let n_index_o_object_2d_scanner_box: usize = (a_o_object_2d.len()-1);
-    // let mut o_object_2d_scanner_box= &mut a_o_object_2d[n_index_o_object_2d_scanner_box];
-
-
-
-
-
-    let mut n_i = 0; 
-    let mut n_x = 0; 
-    let mut n_y = 0; 
-    while(n_i < n_boxes_x*n_boxes_y){
-        n_x = ( n_x + 1 ) % n_boxes_x;
-        n_y = ((n_i as f32) / n_boxes_x as f32) as u32;
-
-        let mut o_object_2d_wall = O_object_2d{
-            s_name: String::from("wall"),
-            o_spatialproperty__translation: O_spatialproperty{
-                o_point_2d__current: O_point_2d{
-                    n_x : n_x as f64 * n_scale_x,
-                    n_y : n_y as f64 * n_scale_y
-                }, 
-                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-            },
-            o_spatialproperty__rotation: O_spatialproperty{
-                o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-            },
-            o_spatialproperty__scale: O_spatialproperty{
-                o_point_2d__current: O_point_2d{
-                    n_x: n_scale_x,
-                    n_y: n_scale_y
-                }, 
-                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-            },
-            // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
-
-            a_n_f64__color: vec![0.0,0.0,0.0,0.0]
-        };
-
-        let a_n_u8__subframe = f_a_rect_read_and_optional_write(
-            &mut a_n_u8__image,
-            n_image_pixels_x as u32, 
-            n_image_pixels_y as u32, 
-            n_channels as u32,
-            o_object_2d_wall.o_spatialproperty__translation.o_point_2d__current.n_x as u32,
-            o_object_2d_wall.o_spatialproperty__translation.o_point_2d__current.n_y as u32,
-            o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_x as u32,
-            o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_y as u32,
-            None
-        );
-
-        let mut n_sum: u32 = 0; 
-        let mut n_i_a_n_u8__subframe = 0;
-        // while(n_i_a_n_u8__subframe < a_n_u8__subframe.len()){
-        //     n_sum += a_n_u8__subframe[n_i_a_n_u8__subframe] as u32;
-        //     n_i_a_n_u8__subframe+=1;
-        // }
-        for n_u8 in a_n_u8__subframe.iter(){
-            n_sum += *n_u8 as u32
-        }
-        let n_avg = n_sum as f32 / a_n_u8__subframe.len() as f32;
-        o_object_2d_wall.a_n_f64__color = vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0];
-         // let sum: u32 = a_n_u8__subframe.iter().sum();
-        
-        println!("sum a_n_u8__subframe {:?}", n_sum);
-        println!("n_avg a_n_u8__subframe {:?}", n_avg);
-
-        if(n_avg < 110.0){        
-            a_o_object_2d.push(
-                o_object_2d_wall
-            );
-        }
-        n_i+=1;
-    }
-
-    
-    // let a_o_object_2d__wall: Vec<O_object_2d> = a_o_object_2d
-    // .into_iter()
-    // .filter(|obj_object_2d| obj_object_2d.s_name == "wall")
-    // .collect();
-    // let o_object_2d_wall = &a_o_object_2d__wall[0];
-
-    
-    let o_object_2d_wall = &a_o_object_2d[0];
-
-    let mut o_object_2d_player = O_object_2d{
-        s_name: String::from("player"),
-        o_spatialproperty__translation: O_spatialproperty{
-            o_point_2d__current: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__current.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__current.n_y
-            }, 
-            o_point_2d__velocity: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__velocity.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__velocity.n_y,
-            }, 
-            o_point_2d__acceleration: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__acceleration.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__acceleration.n_y,
-            },
-        },
-        o_spatialproperty__scale: O_spatialproperty{
-            o_point_2d__current: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_y
-            }, 
-            o_point_2d__velocity: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__velocity.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__velocity.n_y,
-            }, 
-            o_point_2d__acceleration: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__acceleration.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__acceleration.n_y,
-            },
-        },
-        o_spatialproperty__rotation: O_spatialproperty{
-            o_point_2d__current: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__current.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__current.n_y
-            }, 
-            o_point_2d__velocity: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__velocity.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__velocity.n_y,
-            }, 
-            o_point_2d__acceleration: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__acceleration.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__acceleration.n_y,
-            },
-        },
-
-        a_n_f64__color: vec![1.0, 1.0, 0.0, 1.0]
-    };
-    
-    a_o_object_2d.push(o_object_2d_player);
-
-
-
-    let mut n_frame_id = 0;
-    while(true){
-        n_frame_id +=1;
-        // println!("o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y: {:?}",o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y);
-
-        a_n_u8__image = bytes.iter().cloned().collect();
-
-        let o_mouse_loc = mouse::location();
-        let n_mouse_x_normalized = ((o_mouse_loc.x) as f32 /n_screen_rect_size_x as f32); 
-        let n_mouse_y_normalized = ((o_mouse_loc.y) as f32 /n_screen_rect_size_y as f32);
-        let n_pixel_pos_x = (n_mouse_x_normalized * n_screen_rect_size_x as f32) as f64;
-        let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as f64;
-
-        // println!("o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y: {:?}",o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y);
-        for o_object_2d in a_o_object_2d.iter(){
-            f_a_rect_read_and_optional_write(
-                &mut a_n_u8__image,
-                n_image_pixels_x as u32, 
-                n_image_pixels_y as u32, 
-                n_channels as u32,
-                (o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x) as u32,
-                (o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y) as u32,
-                (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_x) as u32,
-                (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_y) as u32,
-                Some(&o_object_2d.a_n_f64__color),
-            );
-        }
-        o_image = ImageView::new(ImageInfo::rgba8(n_image_pixels_x, n_image_pixels_y), &a_n_u8__image);
-        o_window.set_image("image-001", o_image).unwrap();
-    }
-    
     // let n_vector_pixels_x: u32 = 1000; 
     // let n_vector_pixels_y: u32 = 1000;
     // let n_screen_rect_size_x = 1920;
@@ -1046,3 +787,237 @@ fn f_animate_using_window_event(
 
 }
 
+
+fn f_generate_labyrinth(
+
+){
+    let n_screen_rect_size_x = 1920;
+    let n_screen_rect_size_y = 1080;
+
+    // println!("o{:?}", o_object_2d.s_name);
+
+    // The decoder is a build for reader and can be used to set various decoding options
+    // via `Transformations`. The default output transformation is `Transformations::IDENTITY`.
+    let decoder = png::Decoder::new(File::open("./labyrinth.png").unwrap());
+    let mut reader = decoder.read_info().unwrap();
+    // Allocate the output buffer.
+    let mut buf = vec![0; reader.output_buffer_size()];
+    // Read the next frame. An APNG might contain multiple frames.
+    let info = reader.next_frame(&mut buf).unwrap();
+    // Grab the bytes of the image.
+    let bytes = &buf[..info.buffer_size()];
+    // Inspect more details of the last read frame.
+    // let in_animation = reader.info().frame_control.is_some();
+
+    let n_image_pixels_x = info.width; 
+    let n_image_pixels_y = info.height; 
+
+    let n_boxes_x = 32; 
+    let n_boxes_y = 20;
+    let n_scale_x = (n_image_pixels_x as f32/ n_boxes_x as f32) as f64;
+    let n_scale_y = (n_image_pixels_y as f32/ n_boxes_y as f32) as f64;
+    let mut a_o_object_2d: Vec<O_object_2d> = Vec::new();
+    let mut o_object_2d_scanner_box = O_object_2d{
+        s_name: String::from("scanner_box"),
+        o_spatialproperty__translation: O_spatialproperty{
+            o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+        },
+        o_spatialproperty__rotation: O_spatialproperty{
+            o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+        },
+        o_spatialproperty__scale: O_spatialproperty{
+            o_point_2d__current: O_point_2d{n_x: n_scale_x, n_y: n_scale_y}, 
+            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+        },
+    };
+
+    a_o_object_2d.push(o_object_2d_scanner_box);
+    let n_index_o_object_2d_scanner_box: usize = (a_o_object_2d.len()-1);
+    // let mut o_object_2d_scanner_box= &mut a_o_object_2d[n_index_o_object_2d_scanner_box];
+
+    let n_channels: u32 = 4;
+    // let mut a_n_u8__image = vec![0; (n_image_pixels_x * n_image_pixels_y * n_channels).try_into().unwrap()];
+    // let a_n_u8_pixel : [u8; n_pixels_x * n_pixels_y] = [222];
+    let mut a_n_u8__image: Vec<u8> = bytes.iter().cloned().collect();
+
+
+    println!("a : {:?}", info);
+
+
+    let mut a_n_u8__rgba_color_red = vec![255,0,0,255];
+    //      a_
+    //      ^ array
+    //      ..n_u8__
+    //        ^number as item
+    //      ......__rgba_color_red
+    //              ^ descriptive name of the array
+
+    let mut o_image = ImageView::new(ImageInfo::rgba8(n_image_pixels_x, n_image_pixels_y), &a_n_u8__image); 
+    let o_window = create_window("image", Default::default()).unwrap();
+    o_window.set_image("image-001", o_image).unwrap();
+    
+    let mut a_inner_size = o_window.run_function_wait(|o_window| o_window.inner_size()).unwrap();
+    let mut n_window_size_x = a_inner_size[0];
+    let mut n_window_size_y = a_inner_size[1];
+   
+    let mut b_mouse_down = false;
+
+
+    let o_inst_now = Instant::now();
+    let mut n_ts_ms_now = o_inst_now.elapsed().as_millis();
+    let mut n_ts_ms_last = o_inst_now.elapsed().as_millis();
+    let mut n_ts_ms_delta = o_inst_now.elapsed().as_millis();
+
+    let n_fps = 60; 
+    let n_milliseconds_per_frame = ((1000.0)/n_fps as f32) as u128;
+    let n_microseconds_per_frame = ((1000.0*1000.0)/n_fps as f32) as u128;
+
+    let mut n_i = 0; 
+    let mut n_x = 0; 
+    let mut n_y = 0; 
+    while(n_i < n_boxes_x*n_boxes_y){
+        n_x = ( n_x + 1 ) % n_boxes_x;
+        n_y = ((n_i as f32) / n_boxes_x as f32) as u32;
+
+        let a_n_u8__subframe = f_a_rect_read_and_optional_write(
+            &mut a_n_u8__image,
+            n_image_pixels_x as u32, 
+            n_image_pixels_y as u32, 
+            n_channels as u32,
+            (n_x as f64 * a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__scale.o_point_2d__current.n_x) as u32,
+            (n_y as f64 * a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__scale.o_point_2d__current.n_y) as u32,
+            (a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__scale.o_point_2d__current.n_x) as u32,
+            (a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__scale.o_point_2d__current.n_y) as u32,
+            None
+        );
+        let mut n_sum: u32 = 0; 
+        for n_u8 in a_n_u8__subframe.iter(){
+            n_sum += *n_u8 as u32
+        }
+
+        let n_avg = n_sum as f32 / a_n_u8__subframe.len() as f32;
+        
+         // let sum: u32 = a_n_u8__subframe.iter().sum();
+        
+        println!("sum a_n_u8__subframe {:?}", n_sum);
+        println!("n_avg a_n_u8__subframe {:?}", n_avg);
+
+        if(n_avg < 162.0){        
+            a_o_object_2d.push(
+                O_object_2d{
+                    s_name: String::from("wall"),
+                    o_spatialproperty__translation: O_spatialproperty{
+                        o_point_2d__current: O_point_2d{
+                            n_x : n_x as f64 * a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__scale.o_point_2d__current.n_x,
+                            n_y : n_y as f64 * a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__scale.o_point_2d__current.n_y
+                        }, 
+                        o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                        o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+                    },
+                    o_spatialproperty__rotation: O_spatialproperty{
+                        o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                        o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                        o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+                    },
+                    o_spatialproperty__scale: O_spatialproperty{
+                        o_point_2d__current: O_point_2d{n_x: n_scale_x-2.0, n_y: n_scale_y-2.0}, 
+                        o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                        o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+                    },
+                }
+            );
+        }
+        n_i+=1;
+    }
+    // std::process::exit(1);
+
+
+    let mut n_frame_id = 0;
+    while(true){
+        n_frame_id +=1;
+        // println!("o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y: {:?}",o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y);
+
+        a_n_u8__image = bytes.iter().cloned().collect();
+
+        let o_mouse_loc = mouse::location();
+        let n_mouse_x_normalized = ((o_mouse_loc.x) as f32 /n_screen_rect_size_x as f32); 
+        let n_mouse_y_normalized = ((o_mouse_loc.y) as f32 /n_screen_rect_size_y as f32);
+        let n_pixel_pos_x = (n_mouse_x_normalized * n_screen_rect_size_x as f32) as f64;
+        let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as f64;
+
+        a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__translation.o_point_2d__current.n_x = n_pixel_pos_x;
+        a_o_object_2d[n_index_o_object_2d_scanner_box].o_spatialproperty__translation.o_point_2d__current.n_y = n_pixel_pos_y;
+
+        // println!("o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y: {:?}",o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y);
+        for o_object_2d in a_o_object_2d.iter(){
+            f_a_rect_read_and_optional_write(
+                &mut a_n_u8__image,
+                n_image_pixels_x as u32, 
+                n_image_pixels_y as u32, 
+                n_channels as u32,
+                o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x as u32,
+                o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y as u32,
+                o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_x as u32,
+                o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_y as u32,
+                Some(&a_n_u8__rgba_color_red),
+            );
+        }
+        o_image = ImageView::new(ImageInfo::rgba8(n_image_pixels_x, n_image_pixels_y), &a_n_u8__image);
+        o_window.set_image("image-001", o_image).unwrap();
+    }
+    // for event in o_window.event_channel().unwrap() {
+    //     if let event::WindowEvent::MouseMove(event) = event.clone() {
+           
+
+    //         n_ts_ms_now = o_inst_now.elapsed().as_millis();
+    //         n_ts_ms_delta = n_ts_ms_now - n_ts_ms_last;
+
+    //         if(n_ts_ms_delta > (n_milliseconds_per_frame as u128)){
+    //                 // println!("render now!");
+                    
+    //                 let n_mouse_x_normalized = ((event.position[0]) as f32 /n_window_size_x as f32); 
+    //                 let n_mouse_y_normalized = ((event.position[1]) as f32 /n_window_size_y as f32);
+                    
+    //                 let n_pixel_pos_x = (n_mouse_x_normalized * n_screen_rect_size_x as f32) as u32;
+    //                 let n_pixel_pos_y = (n_mouse_y_normalized * n_screen_rect_size_y as f32) as u32;
+
+    //                 o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_x = n_pixel_pos_x;
+    //                 o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y = n_pixel_pos_y;
+
+    //                 n_ts_ms_now = o_inst_now.elapsed().as_millis();
+    //                 n_ts_ms_delta = n_ts_ms_now - n_ts_ms_last;
+                    
+    //                 n_ts_ms_last = n_ts_ms_now;
+
+
+    //         }
+    //     }
+    //     if let event::WindowEvent::KeyboardInput(event) = event.clone() {
+
+
+    //         // println!("{:#?}", event);
+    //         if event.input.key_code == Some(event::VirtualKeyCode::Escape) && event.input.state.is_pressed() {
+    //             break;
+    //         }
+    //         if(event.input.key_code.unwrap() == event::VirtualKeyCode::Space){
+    //             a_n_u8__image.fill(0);
+    //         }
+    //         o_image = ImageView::new(ImageInfo::rgba8(n_image_pixels_x, n_image_pixels_y), &a_n_u8__image);
+    //         o_window.set_image("image-001", o_image).unwrap();
+    //     }
+
+    //     if let event::WindowEvent::MouseButton(event) = event.clone() {
+    //         // println!("bt {:?}", event);
+    //         if(event.state == show_image::event::ElementState::Pressed){
+    //             b_mouse_down = true;
+    //         }else{
+    //             b_mouse_down = false;
+    //         }
+    //     }
+    // }
+}
