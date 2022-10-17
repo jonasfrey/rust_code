@@ -36,6 +36,9 @@ fn func_2() {
 // call it like 
 // cargo run '{"s_object_name":"O_person", "object": {"name"}, "s_function_name": "f_a_o_create"}'
 fn main(){
+
+
+
     let args: Vec<String> = env::args().collect();
     let mut s_first_arg = args[1].to_owned();
     println!("s_first_arg {}", s_first_arg);

@@ -148,5 +148,5 @@ for s_url in a_s_url__merged[1952:]:
 
         gc.collect()
 
-np.save("a_a_objectids_vorfilter", a_a_objectids_vorfilter)
+np.save("a_a_objectids_vorfilter", a_a_objectids_vorfilter) 
 np.save("a_errorfiles", a_errorfiles) 
