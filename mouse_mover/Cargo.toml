@@ -1,0 +1,12 @@
+[package]
+name = "mouse_mover"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+device_query = "1.1.1"
+enigo = "0.0.14"
+rdev = "0.5.1"
