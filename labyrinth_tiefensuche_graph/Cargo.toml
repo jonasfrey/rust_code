@@ -17,3 +17,9 @@ device_query = "1.1.1"
 # buttons = "0.3.1"
 # ggez = "0.5.1"
 # readmouse = "0.2.1"
+
+
+# for measuring performance
+# https://blog.anp.lol/rust/2016/07/24/profiling-rust-perf-flamegraph/
+[profile.release]
+debug = true
