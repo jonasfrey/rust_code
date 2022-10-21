@@ -47,13 +47,13 @@ struct O_spatialproperty{
     o_spatialproperty.o_point_2d__current.n_x += o_spatialproperty.o_point_2d__velocity.n_x;
     o_spatialproperty.o_point_2d__current.n_y += o_spatialproperty.o_point_2d__velocity.n_y;
  }
- #[derive(Debug, Clone)]
+//  #[derive(Debug, Clone)]
  struct O_object_2d{
     s_name: String,
     o_spatialproperty__translation: O_spatialproperty,
     o_spatialproperty__rotation: O_spatialproperty,
     o_spatialproperty__scale: O_spatialproperty,
-    f_a_n_f64__color: fn(u32, u32, u64, usize) -> Vec<f64>
+    f_a_n_u8__color: fn(&O_game, &O_object_2d, u32, u32) -> Vec<u8>
  }
 
 fn f_calculate_o_object_2d(
@@ -65,19 +65,46 @@ fn f_calculate_o_object_2d(
     f_calculate_o_spatialproperty(&mut o_object_2d.o_spatialproperty__scale);
 }
 
-fn f_a_color_rgba_mixed(
-    a_color_rgba_1: Vec<u8>,
-    a_color_rgba_2: Vec<u8>,
+
+
+
+// fn f_a_n_u8__color_rgba_mixed(
+//     src: u32, 
+//     dst: u32, 
+//     t: u32, 
+//     // uint32_t src, uint32_t dst, uint32_t t
+// )-> u32{
+//     // assert(t <= 255);
+//     const s: u32 = 255 - t;
+//     const n_mixed : u32 = (
+//         (((((src >> 0)  & 0xff) * s +
+//            ((dst >> 0)  & 0xff) * t) >> 8)) |
+//         (((((src >> 8)  & 0xff) * s +
+//            ((dst >> 8)  & 0xff) * t)     )  & ~0xff) |
+//         (((((src >> 16) & 0xff) * s +
+//            ((dst >> 16) & 0xff) * t) << 8)  & ~0xffff) |
+//         (((((src >> 24) & 0xff) * s +
+//            ((dst >> 24) & 0xff) * t) << 16) & ~0xffffff)
+//     );
+//     println!(" n_mixed {:?} ", n_mixed.to_be_bytes());
+//     return n_mixed
+// }
+
+
+fn f_a_n_u8__color_rgba_mixed(
+
+    n_r_1: f32, //rA
+    n_g_1: f32, //gA
+    n_b_1: f32, //bA
+    n_a_1: f32, //n_a_1
+    n_r_2: f32, //rB
+    n_g_2: f32, //gB
+    n_b_2: f32, //bB
+    n_a_2: f32, //aB
+
 ) -> Vec<u8>{
 
-    let n_r_1 = a_color_rgba_1[0 as usize] as f32; //rA
-    let n_g_1 = a_color_rgba_1[1 as usize] as f32; //gA
-    let n_b_1 = a_color_rgba_1[2 as usize] as f32; //bA
-    let n_a_1 = a_color_rgba_1[3 as usize] as f32; //n_a_1
-    let n_r_2 = a_color_rgba_2[0 as usize] as f32; //rB
-    let n_g_2 = a_color_rgba_2[1 as usize] as f32; //gB
-    let n_b_2 = a_color_rgba_2[2 as usize] as f32; //bB
-    let n_a_2 = a_color_rgba_2[3 as usize] as f32; //aB
+
 
     let n_max : f32 = 255.0;
 
@@ -132,20 +159,16 @@ fn f_b_collision_with_o_object_2d_by_s_name(
     return b_collision;
 }
 
-fn f_a_rect_read_and_optional_write(
-    a_n_u8__image: &mut Vec<u8>,
-    n_image_scale_x : u32,
-    n_image_scale_y : u32,
-    n_image_channels: u32,
-    n_rect_translation_x : u32,
-    n_rect_translation_y : u32,
-    n_rect_scale_x : u32,
-    n_rect_scale_y : u32,
-    // a_n_f64__color : Option<&Vec<f64>>
-    f_a_n_f64__color: Option<fn(u32, u32, u64, usize) -> Vec<f64>>, 
-    n_frame_id: Option<u64>,
-    n_index_o_object_2d: Option<usize>
-) -> Vec<u8> {
+fn f_a_n_u8_read(
+    a_n_u8__image: &Vec<u8>,
+    n_image_scale_x: u32, 
+    n_image_scale_y: u32, 
+    n_image_channels: u32, 
+    n_rect_translation_x: u32, 
+    n_rect_translation_y: u32, 
+    n_rect_scale_x: u32, 
+    n_rect_scale_y: u32, 
+)-> Vec<u8>{
 
     let mut a_vec: Vec<u8> = vec![
         0;
@@ -163,33 +186,106 @@ fn f_a_rect_read_and_optional_write(
     let n_index_max = a_n_u8__image.len()-1;
 
     let mut n_index_a_vec = 0;
-    let mut a_n_f64__color :Vec<f64>= vec![0.0,0.0,0.0,0.0];
     while(n_y < n_rect_scale_y){
         n_x = 0;
         while(n_x < n_rect_scale_x){
             let n_index_pixel = 
-            ((n_rect_translation_y + n_y) * n_image_scale_x * n_image_channels) +
-            ((n_rect_translation_x + n_x) * n_image_channels);
+            ((n_rect_translation_y + n_y) * n_image_scale_x * n_image_channels as u32) +
+            ((n_rect_translation_x + n_x) * n_image_channels as u32);
             
             n_channel = 0;
-            
-            if(f_a_n_f64__color.is_none() == false){
-                a_n_f64__color = f_a_n_f64__color.unwrap()(n_x, n_y, n_frame_id.unwrap(), n_index_o_object_2d.unwrap());
-            }
+
             while(n_channel < n_image_channels){
-                let n_index = (n_index_pixel+n_channel);
+                let n_index = (n_index_pixel+n_channel as u32);
                 if(n_index < 0 || n_index > n_index_max.try_into().unwrap()){
                     n_channel+=1;
                     continue;
                 }
-                if(
-                    f_a_n_f64__color.is_none() == false
-                ){
-                    // println!("a_n {:?}", (a_n_f64__color[n_channel as usize] * (u8::MAX as f64)) as u8);
-                    a_n_u8__image[n_index as usize] =(a_n_f64__color[n_channel as usize] * (u8::MAX as f64)) as u8;
-                    // a_n_u8__image[n_index as usize] =255;
-                }
                 a_vec[n_index_a_vec as usize] = (a_n_u8__image[n_index as usize]);
+                n_index_a_vec +=1;
+                n_channel+= 1;
+            }
+            // println!("x|y {:?}|{:?}", n_x, n_y);
+            n_x+=1;
+        }
+        n_y+=1;
+        // println!("x|y {:?}|{:?}", n_x, n_y);
+    }
+
+    return a_vec
+}
+
+fn f_draw_o_object_2d(
+    o_game: &mut O_game, 
+    n_index_o_object_2d: usize,
+) -> Vec<u8> {
+    let o_object_2d = &o_game.a_o_object_2d[n_index_o_object_2d];
+    let n_image_scale_x  = o_game.o_object_2d_window.o_spatialproperty__scale.o_point_2d__current.n_x as u32;
+    let n_image_scale_y  = o_game.o_object_2d_window.o_spatialproperty__scale.o_point_2d__current.n_y as u32;
+    let n_image_channels = o_game.n_pixel_channels;
+    let n_rect_translation_x  = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x as u32;
+    let n_rect_translation_y  = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y as u32;
+    let n_rect_scale_x  = o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_x as u32;
+    let n_rect_scale_y  = o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_y as u32;
+
+    let mut a_vec: Vec<u8> = vec![
+        0;
+        n_image_channels as usize *
+        n_rect_scale_x as usize *
+        n_rect_scale_y as usize 
+    ];
+
+    let mut n_rgba_value = 0;
+    let mut n_pixel_index = 0;
+    let mut n_x = 0;
+    let mut n_y = 0;
+    let mut n_channel = 0;
+    
+    let n_index_max = o_game.a_n_u8__image.len()-1;
+
+    let mut n_index_a_vec = 0;
+
+    while(n_y < n_rect_scale_y){
+        n_x = 0;
+        while(n_x < n_rect_scale_x){
+            let n_index_pixel = 
+            ((n_rect_translation_y + n_y) * n_image_scale_x * n_image_channels as u32) +
+            ((n_rect_translation_x + n_x) * n_image_channels as u32);
+            
+            n_channel = 0;
+            
+            let mut f = o_object_2d.f_a_n_u8__color;
+            let mut a_n_u8__color = f(
+                o_game,
+                o_object_2d,
+                n_x, 
+                n_y
+            );
+            if(a_n_u8__color[3] != 255){
+                a_n_u8__color = f_a_n_u8__color_rgba_mixed(
+                    o_game.a_n_u8__image[n_index_pixel as usize +0] as f32,
+                    o_game.a_n_u8__image[n_index_pixel as usize +1] as f32,
+                    o_game.a_n_u8__image[n_index_pixel as usize +2] as f32,
+                    o_game.a_n_u8__image[n_index_pixel as usize +3] as f32,
+                    a_n_u8__color[0] as f32,
+                    a_n_u8__color[1] as f32,
+                    a_n_u8__color[2] as f32,
+                    a_n_u8__color[3] as f32,
+                );
+            }
+            while(n_channel < n_image_channels){
+                let n_index = (n_index_pixel+n_channel as u32);
+                if(n_index < 0 || n_index > n_index_max.try_into().unwrap()){
+                    n_channel+=1;
+                    continue;
+                }
+
+
+                // println!("a_n {:?}", (a_n_f64__color[n_channel as usize] * (u8::MAX as f64)) as u8);
+                o_game.a_n_u8__image[n_index as usize] = a_n_u8__color[n_channel as usize];
+                // o_game.a_n_u8__image[n_index as usize] =255;
+                
+                a_vec[n_index_a_vec as usize] = (o_game.a_n_u8__image[n_index as usize]);
                 n_index_a_vec +=1;
                 n_channel+=1;
             }
@@ -205,7 +301,7 @@ fn f_a_rect_read_and_optional_write(
 }
 
 
-#[derive(Debug)]
+// #[derive(Debug)]
 struct O_game<'a>{
     n_pixel_channels: u8, 
     o_object_2d_window: O_object_2d,
@@ -225,49 +321,143 @@ struct O_game<'a>{
     // o_image: T,
 }
 
-fn f_a_n_f64__color__modulo(n_x: u32, n_y:u32, n_frame_id: u64, n_index_o_object_2d: usize)-> Vec<f64>{
-    let mut n_mod = (n_frame_id % 100)+1;
-    vec![
-        (((n_x % n_mod as u32) as f32 )/ n_mod as f32) as f64,
-        (((n_x % n_mod as u32) as f32 )/ n_mod as f32) as f64,
-        (((n_x % n_mod as u32) as f32 )/ n_mod as f32) as f64,
-        (((n_x % n_mod as u32) as f32 )/ n_mod as f32) as f64,
-    ]
-}
-fn f_a_n_f64__color__green(n_x: u32, n_y:u32, n_frame_id: u64, n_index_o_object_2d: usize)-> Vec<f64>{
-    vec![0.0,1.0,0.0,1.0]
-}
-fn f_a_n_f64__color__red(n_x: u32, n_y:u32, n_frame_id: u64, n_index_o_object_2d: usize)-> Vec<f64>{
-    vec![1.0,0.0,0.0,1.0]
-}
-fn f_a_n_f64__color__random_black(n_x: u32, n_y:u32, n_frame_id: u64, n_index_o_object_2d: usize)-> Vec<f64>{
+fn f_a_n_u8__color__wall(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
     let mut rng = rand::thread_rng();
     let n_rand = rng.gen::<f64>();
+    if(
+        n_x % 10 > 2
+        && 
+        n_y % 10 > 2
+    ){
+        vec![
+            (0.8 + n_rand * 0.2 * 255.0 ) as u8,
+            (0.0 * 255.0 ) as u8,
+            (0.0 * 255.0 ) as u8, 
+            (1.0 * 255.0 ) as u8
+        ]
+    }else{
+        vec![
+            0,
+            0,
+            0, 
+            255
+        ]
+    }
+}
+
+fn f_a_n_u8__color__modulo(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
+    let mut n_mod = (o_game.n_frame_id % 100)+1;
+    vec![
+        ((((n_x % n_mod as u32) as f32 )/ n_mod as f32) * 255.0) as u8,
+        ((((n_x % n_mod as u32) as f32 )/ n_mod as f32) * 255.0) as u8,
+        ((((n_x % n_mod as u32) as f32 )/ n_mod as f32) * 255.0) as u8,
+        ((((n_x % n_mod as u32) as f32 )/ n_mod as f32) * 255.0) as u8,
+    ]
+}
+fn f_a_n_u8__color__green(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
+    vec![0,255,0,255]
+}
+fn f_a_n_u8__color__red(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
+    vec![255,0,0,255]
+}
+
+fn f_a_n_u8__color__player(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
+    let n_radius : i32 = 5;
+    let n_scale_x_half = (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_x as f32)/2.0;
+    let n_scale_y_half = (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_y as f32)/2.0;
+    // let n_amplitude_mutator = ((o_game.n_frame_id as f32 * 0.2).sin() * 10.0);
+    let n_amplitude_mutator = 5.0;
+    let n_x_center = 
+        ((o_game.n_frame_id as f32 * 0.1).sin() * (n_scale_x_half - n_amplitude_mutator))
+        + 
+        n_scale_x_half;
+    let n_y_center = 
+        ((o_game.n_frame_id as f32 * 0.1).cos() * (n_scale_y_half - n_amplitude_mutator))
+        + 
+        n_scale_y_half;
+    let n_result = 
+    (
+        (n_x as i32 - n_x_center as i32).pow(2) + 
+        (n_y as i32 - n_y_center as i32).pow(2) 
+    );
+    let n_radius_pow_2 = n_radius.pow(2);
+    if(
+        n_result < n_radius_pow_2
+    ){
+        let n_difference_normalized = (n_radius_pow_2 - (n_result)) as f32 / n_radius_pow_2 as f32;
+        println!("n_difference_normalized) {:?}", n_difference_normalized);
+        return vec![
+            (n_difference_normalized as f32 * 255.0) as u8,
+            (n_difference_normalized as f32 * 255.0) as u8,
+            0, 
+            255
+            ] // inside circle
+    }
+    if(
+        n_result == n_radius_pow_2
+    ){
+        return vec![255,255,255,255] // directly on the border of the cirlcle
+    }
+    return  vec![0,0,0,0];
+}
+
+fn f_a_n_u8__color__graph_node(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
+    let n_radius : i32 = ((o_game.n_frame_id as f32 * 0.1).sin() * 20.0) as i32;
+    let n_x_center = (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_x /2.0) as u32;
+    let n_y_center = (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_y /2.0) as u32;
+    let n_radius_pow_2 = n_radius.pow(2);
+    let n_result =
+    ((n_x - n_x_center)as i32).pow(2) + 
+    ((n_y - n_y_center)as i32).pow(2) ;
+    if(
+        n_result < n_radius_pow_2
+    ){
+        let n_difference_normalized = (n_radius_pow_2 - (n_result)) as f32 / n_radius_pow_2 as f32;
+        // println!("n_difference_normalized) {:?}", n_difference_normalized);
+        return vec![
+            0,
+            0,
+            (n_difference_normalized as f32 * 255.0) as u8,
+            255
+            ] // inside circle
+
+    }else{
+        vec![
+            0,
+            0,
+            0,
+            0
+            ]
+    }
+}
+fn f_a_n_u8__color__random_black(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
+    let mut rng = rand::thread_rng();
+    let n_rand = rng.gen::<u8>();
     vec![
         n_rand,
         n_rand,
         n_rand,
-        1.0
+        255
     ]
 }
-fn f_a_n_f64__color__random(n_x: u32, n_y:u32, n_frame_id: u64, n_index_o_object_2d: usize)-> Vec<f64>{
+fn f_a_n_u8__color__random(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
     let mut rng = rand::thread_rng();
 
     vec![
-        rng.gen::<f64>(), 
-        rng.gen::<f64>(),
-        rng.gen::<f64>(),
-        rng.gen::<f64>()
+        rng.gen::<u8>(), 
+        rng.gen::<u8>(),
+        rng.gen::<u8>(),
+        rng.gen::<u8>()
     ]
 }
-fn f_a_n_f64__color__yellow_random(n_x: u32, n_y:u32, n_frame_id: u64, n_index_o_object_2d: usize)-> Vec<f64>{
+fn f_a_n_u8__color__yellow_random(o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32)-> Vec<u8>{
     let mut rng = rand::thread_rng();
-    let n_rand = rng.gen::<f64>();
+    let n_rand = rng.gen::<u8>();
     vec![
         n_rand,
         n_rand,
-        0.0, 
-        1.0
+        0, 
+        255
     ]
 }
 
@@ -287,11 +477,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
         },
         o_spatialproperty__scale: O_spatialproperty{
-            o_point_2d__current: O_point_2d{n_x: 1920.0, n_y: 1080.0}, 
+            o_point_2d__current: O_point_2d{n_x: 1280.0, n_y: 720.0}, 
             o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
             o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
         },
-        f_a_n_f64__color: f_a_n_f64__color__red
+        f_a_n_u8__color: f_a_n_u8__color__red
     };
     let n_pixel_channels = 4;
 
@@ -341,7 +531,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
             o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
         },
-        f_a_n_f64__color: f_a_n_f64__color__red
+        f_a_n_u8__color: f_a_n_u8__color__red
     };
 
     let mut o_game = O_game{
@@ -365,8 +555,55 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
    
 
     f_detect_labyrinth_from_image(&mut o_game);
-   
-    let o_object_2d_wall = &o_game.a_o_object_2d[0];
+
+
+
+    // crate graph nodes
+    let mut n_i = 0; 
+    let mut n_x = 0; 
+    let mut n_y = 0;
+    while(n_i < o_game.n_boxes_x*o_game.n_boxes_y){
+        n_x = ( n_x + 1 ) % o_game.n_boxes_x;
+        n_y = ((n_i as f32) / o_game.n_boxes_x as f32) as u32;
+
+        let mut o_object_2d_graph_node = O_object_2d{
+            s_name: String::from("graph_node"),
+            o_spatialproperty__translation: O_spatialproperty{
+                o_point_2d__current: O_point_2d{
+                    n_x : n_x as f64 * o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+                    n_y : n_y as f64 * o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y
+                }, 
+                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+            },
+            o_spatialproperty__rotation: O_spatialproperty{
+                o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+            },
+            o_spatialproperty__scale: O_spatialproperty{
+                o_point_2d__current: O_point_2d{
+                    n_x: o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+                    n_y: o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y
+                }, 
+                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+            },
+            // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
+
+            f_a_n_u8__color: f_a_n_u8__color__graph_node
+
+        };
+        let mut b_collision = f_b_collision(
+            &o_object_2d_graph_node,
+            &o_game.a_o_object_2d
+        );
+        if(!b_collision){
+            o_game.a_o_object_2d.push(o_object_2d_graph_node)
+        }
+        n_i+=1;
+    }
+
 
     let mut o_object_2d_player = O_object_2d{
         s_name: String::from("player"),
@@ -375,48 +612,88 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 n_x : 0.0,
                 n_y : 14.0 * o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y
             }, 
+                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+            },
+            o_spatialproperty__rotation: O_spatialproperty{
+                o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+            },
+            o_spatialproperty__scale: O_spatialproperty{
+                o_point_2d__current: O_point_2d{
+                    n_x: o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+                    n_y: o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y
+                }, 
+                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+            },
+
+        f_a_n_u8__color: f_a_n_u8__color__player
+    };
+    let n_index_o_object_2d_player = o_game.a_o_object_2d.len();
+    o_game.a_o_object_2d.push(o_object_2d_player);
+
+
+    let mut o_object_2d_target = O_object_2d{
+        s_name: String::from("target"),
+        o_spatialproperty__translation: O_spatialproperty{
+            o_point_2d__current: O_point_2d{
+                n_x : o_game.n_boxes_x as f64 * o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+                n_y : 8.0 * o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y
+            }, 
             o_point_2d__velocity: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__velocity.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__velocity.n_y,
+                n_x : 0.0,
+                n_y : 0.0,
             }, 
             o_point_2d__acceleration: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__acceleration.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__translation.o_point_2d__acceleration.n_y,
+                n_x : 0.0,
+                n_y : 0.0,
             },
         },
         o_spatialproperty__scale: O_spatialproperty{
             o_point_2d__current: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_y
+                n_x : 0.0,
+                n_y : 0.0
             }, 
             o_point_2d__velocity: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__velocity.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__velocity.n_y,
+                n_x : 0.0,
+                n_y : 0.0,
             }, 
             o_point_2d__acceleration: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__acceleration.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__scale.o_point_2d__acceleration.n_y,
+                n_x : 0.0,
+                n_y : 0.0,
             },
         },
         o_spatialproperty__rotation: O_spatialproperty{
             o_point_2d__current: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__current.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__current.n_y
+                n_x : 0.0,
+                n_y : 0.0
             }, 
             o_point_2d__velocity: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__velocity.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__velocity.n_y,
+                n_x : 0.0,
+                n_y : 0.0,
             }, 
             o_point_2d__acceleration: O_point_2d{
-                n_x : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__acceleration.n_x,
-                n_y : o_object_2d_wall.o_spatialproperty__rotation.o_point_2d__acceleration.n_y,
+                n_x : 0.0,
+                n_y : 0.0,
             },
         },
 
-        f_a_n_f64__color: f_a_n_f64__color__yellow_random
+        f_a_n_u8__color: |o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32| -> Vec<u8> {
+            let n_max = 10;
+            let n_normalized = (10.0 / (n_x % 10) as f32);
+
+            vec![
+                0,
+                (n_normalized * 255.0) as u8 ,
+                0,
+                255
+            ]
+        }
     };
-    let n_index_o_object_2d_player = o_game.a_o_object_2d.len();
-    o_game.a_o_object_2d.push(o_object_2d_player);
+    let n_index_o_object_2d_target = o_game.a_o_object_2d.len();
+    o_game.a_o_object_2d.push(o_object_2d_target);
 
     let n_screen_rect_size_x = 1920;
     let n_screen_rect_size_y = 1080;
@@ -431,17 +708,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let n_x = o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__translation.o_point_2d__current.n_x; 
     let n_y = o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__translation.o_point_2d__current.n_y; 
+    let n_x_target = o_game.a_o_object_2d[n_index_o_object_2d_target].o_spatialproperty__translation.o_point_2d__current.n_x; 
+    let n_y_target = o_game.a_o_object_2d[n_index_o_object_2d_target].o_spatialproperty__translation.o_point_2d__current.n_y; 
+    
     
     // f_create_path_until_dead_end(
     //     &mut o_game,
     //     n_x, 
     //     n_y
     // );
-    f_create_path_until_dead_end_random_choice(
-        &mut o_game,
-        n_x, 
-        n_y
-    );
+
+    // f_create_path_until_dead_end_random_choice(
+    //     &mut o_game,
+    //     n_x, 
+    //     n_y
+    // );
+
+    // let mut a_o_object_2d__path_part_to_target = f_a_o_object_2d__path_part_to_target(
+    //     &mut o_game,
+    //     n_x, 
+    //     n_y, 
+    //     n_x_target, 
+    //     n_y_target
+    // );
+    // o_game.a_o_object_2d.append(&mut a_o_object_2d__path_part_to_target);
 
     let o_instant_now = Instant::now();
     while(true){
@@ -471,7 +761,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut n_x = n_x_cached; 
         let mut n_y = n_y_cached; 
         
+
         if(a_o_keycode.contains(&Keycode::Right) && !a_o_keycode_last.contains(&Keycode::Right)){
+            // println!("right!");
             n_x = o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__translation.o_point_2d__current.n_x + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x; 
             n_y = o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__translation.o_point_2d__current.n_y;
         }
@@ -488,8 +780,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             n_x = o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__translation.o_point_2d__current.n_x;
         }
 
-
-
         o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__translation.o_point_2d__current.n_y = n_y;
         o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__translation.o_point_2d__current.n_x = n_x;
 
@@ -505,33 +795,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }else{
             if(n_x != n_x_cached || n_y != n_y_cached){
                 
-                o_game.a_o_object_2d.push(
-                    O_object_2d{
-                        s_name: String::from("player_visited"),
-                        o_spatialproperty__translation: O_spatialproperty{
-                            o_point_2d__current: O_point_2d{
-                                n_x: n_x_cached,
-                                n_y: n_y_cached
-                            }, 
-                            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-                        },
-                        o_spatialproperty__rotation: O_spatialproperty{
-                            o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-                        },
-                        o_spatialproperty__scale: O_spatialproperty{
-                            o_point_2d__current: O_point_2d{
-                                n_x: o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__scale.o_point_2d__current.n_x,
-                                n_y: o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__scale.o_point_2d__current.n_y
-                            }, 
-                            o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                            o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-                        },
-                        f_a_n_f64__color: f_a_n_f64__color__green
-                    }
-                );
+                // o_game.a_o_object_2d.push(
+                //     O_object_2d{
+                //         s_name: String::from("player_visited"),
+                //         o_spatialproperty__translation: O_spatialproperty{
+                //             o_point_2d__current: O_point_2d{
+                //                 n_x: n_x_cached,
+                //                 n_y: n_y_cached
+                //             }, 
+                //             o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                //             o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+                //         },
+                //         o_spatialproperty__rotation: O_spatialproperty{
+                //             o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                //             o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                //             o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+                //         },
+                //         o_spatialproperty__scale: O_spatialproperty{
+                //             o_point_2d__current: O_point_2d{
+                //                 n_x: o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__scale.o_point_2d__current.n_x,
+                //                 n_y: o_game.a_o_object_2d[n_index_o_object_2d_player].o_spatialproperty__scale.o_point_2d__current.n_y
+                //             }, 
+                //             o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+                //             o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+                //         },
+                //         f_a_n_u8__color: f_a_n_u8__color__green
+                //     }
+                // );
             }
         }
         // else{
@@ -544,22 +834,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // }
         
         // println!("o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y: {:?}",o_object_2d_scanner_box.o_spatialproperty__translation.o_point_2d__current.n_y);
-        for (n_index_o_object_2d, o_object_2d) in o_game.a_o_object_2d.iter().enumerate(){
-            
-            f_a_rect_read_and_optional_write(
-                o_game.a_n_u8__image,
-                o_game.o_object_2d_window.o_spatialproperty__scale.o_point_2d__current.n_x as u32,  
-                o_game.o_object_2d_window.o_spatialproperty__scale.o_point_2d__current.n_y as u32,
-                o_game.n_pixel_channels as u32, 
-                (o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x) as u32,
-                (o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y) as u32,
-                (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_x) as u32,
-                (o_object_2d.o_spatialproperty__scale.o_point_2d__current.n_y) as u32,
-                Some(o_object_2d.f_a_n_f64__color),
-                Some(o_game.n_frame_id),
-                Some(n_index_o_object_2d as usize)
-            );
+        let mut n_index_o_object_2d = 0; 
+        while(n_index_o_object_2d < o_game.a_o_object_2d.len()){
+            // println!("index {:?}", n_index_o_object_2d);
+            // println!("drawing: {:?}", o_game.a_o_object_2d[n_index_o_object_2d].s_name);
+            f_draw_o_object_2d(
+                &mut o_game, 
+                n_index_o_object_2d, 
+            ); 
+            n_index_o_object_2d+=1;
         }
+
 
         o_image = ImageView::new(
             ImageInfo::rgba8(
@@ -581,6 +866,374 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   Ok(())
 }
+
+// fn f_create_path_to_target(
+//     o_game: &mut O_game,
+    
+// ){
+//     let mut a_o_object2d_path_part : Vec<&O_object_2d> = Vec::new();
+//     let mut o_object_2d_start: &O_object_2d;
+//     let mut o_object_2d_end: &O_object_2d;
+//     for o_object_2d in o_game.a_o_object_2d.iter(){
+//         if(o_object_2d.s_name == String::from("player")){
+//             o_object_2d_start = &o_object_2d;
+//         }
+//         if(o_object_2d.s_name == String::from("target")){
+//             o_object_2d_end = &o_object_2d;
+//         }
+//     }
+
+//     while(true){
+//         let mut a_o_object_2d_movement_option = f_a_o_object_2d_movement_option(
+//             o_object_2d_start,
+//             vec![a_o_object2d_path_part], 
+//             o_game
+//         );
+//         let mut n_index_option = 0; 
+//         while(n_index_option < a_o_object_2d_movement_option.len()){
+            
+//             let mut a_o_object_2d_path_part_until_dead_end_or_option = 
+//             f_a_o_object_2d_path_part_until_dead_end_or_option(
+//                 &a_o_object_2d_movement_option[0], 
+//                 a_o_object2d_path_part,
+//                 o_game 
+//             );
+
+//             n_index_option+=1;
+//         }
+
+//     }
+
+// }
+
+// fn f_a_o_object_2d_path_part_until_dead_end_or_option(
+//     o_object_2d: &O_object_2d,
+//     a_o_object2d: Vec<&O_object_2d>,
+//     o_game: &O_game
+// )-> Vec<&O_object_2d>{
+//     let mut a_o_object2d_visited: Vec<&O_object_2d> = Vec::new();
+
+//     let mut a_o_object_2d_movement_option = f_a_o_object_2d_movement_option(
+//         o_object_2d,
+//         vec![a_o_object2d_visited, a_o_object2d], 
+//         o_game
+//     ); 
+//     while(true){
+//         if(a_o_object_2d_movement_option.len() == 0){
+//             break;
+//         }
+//         if(
+//             a_o_object_2d_movement_option.len() == 1
+//         ){
+//             a_o_object2d_visited.push(&a_o_object_2d_movement_option[0]);
+//             a_o_object_2d_movement_option = f_a_o_object_2d_movement_option(
+//                 &a_o_object_2d_movement_option.remove(0),
+//                 vec![a_o_object2d_visited, a_o_object2d], 
+//                 o_game
+//             ); 
+//         }
+//         if(a_o_object_2d_movement_option.len() == 2){
+//             a_o_object2d_visited.push(&a_o_object_2d_movement_option[0]);
+//             break;
+//         }
+
+//     }
+//     return a_o_object2d_visited
+// }
+
+// fn f_a_o_object_2d_movement_option(
+//     o_object_2d: &O_object_2d,
+//     a_a_o_object2d: Vec<Vec<&O_object_2d>>,
+//     o_game: &O_game
+// ) -> Vec<O_object_2d>{
+
+//     let mut n_i = 0;
+//     let mut n_x = 0.0;
+//     let mut n_y = 0.0;
+//     let mut s_name_o_object_2d = "movement_option";
+//     let mut a_o_object_2d_movement_option : Vec<O_object_2d> = Vec::new();
+
+//     while(n_i < 4){
+//         if(n_i == 0){
+//             n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x;
+//             n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
+//         }
+//         if(n_i == 1){
+//             n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x - o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x;
+//             n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
+//         }
+//         if(n_i == 2){
+//             n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
+//             n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y;
+//         }
+//         if(n_i == 3){
+//             n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
+//             n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y - o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y;
+//         }
+
+//         let o_object_2d_potential_movement_option = O_object_2d{
+//             s_name: String::from(s_name_o_object_2d),
+//             o_spatialproperty__translation: O_spatialproperty{
+//                 o_point_2d__current: O_point_2d{
+//                     n_x:n_x, 
+//                     n_y:n_y
+//                 }, 
+//                 o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+//                 o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+//             },
+//             o_spatialproperty__rotation: O_spatialproperty{
+//                 o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+//                 o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+//                 o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+//             },
+//             o_spatialproperty__scale: O_spatialproperty{
+//                 o_point_2d__current: O_point_2d{
+//                     n_x: o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+//                     n_y: o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y
+//                 }, 
+//                 o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
+//                 o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
+//             },
+//             // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
+
+//             f_a_n_u8__color: |n_x: u32, n_y:u32, n_frame_id:u64, n_index_o_object_2d: usize| -> Vec<u8> {
+//                 let n_max_time = 33;
+//                 // let mut rng = rand::thread_rng();
+//                 // let n_start = (rng.gen::<f64>() * n_max_time as f64) as u64;
+//                 vec![
+//                     (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64),
+//                     (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64),
+//                     (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64),
+//                     (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64)
+//                 ]
+//             }
+//         };
+//         let b_collision = f_b_collision(
+//             &o_object_2d_potential_movement_option, 
+//             a_a_o_object2d
+//         );
+//         let b_out_of_bounds = f_b_out_of_bounds(
+//             &o_object_2d_potential_movement_option, 
+//             o_game
+//         );
+//         if(!b_collision && !b_out_of_bounds){
+//             a_o_object_2d_movement_option.push(
+//                 o_object_2d_potential_movement_option
+//             )
+//         }
+
+//         n_i+=1;
+//     }
+//     return a_o_object_2d_movement_option;
+// }
+
+
+fn f_b_out_of_bounds(
+    o_object_2d: &O_object_2d, 
+    o_game: &O_game
+)->bool{
+    let mut b_out_of_bounds = false;
+    if(
+        (
+            o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x < 0.0
+            || 
+            o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x > o_game.o_object_2d_window.o_spatialproperty__scale.o_point_2d__current.n_x
+            ||
+            o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y < 0.0
+            ||
+            o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y > o_game.o_object_2d_window.o_spatialproperty__scale.o_point_2d__current.n_y
+        )
+    ){
+        b_out_of_bounds = true;
+    }
+    return b_out_of_bounds
+
+}
+fn f_b_collision(
+    o_object_2d: &O_object_2d,
+    // a_a_o_object2d: Vec<Vec<&O_object_2d>>, 
+    a_o_object2d: &Vec<O_object_2d>, 
+)->bool{
+    let mut b_collision = false;
+    // for a_o_object2d in a_a_o_object2d.iter(){
+        for obj_object_2d in a_o_object2d.iter(){
+
+            if(
+                obj_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y == o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y
+                &&
+                obj_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x
+            ){
+                b_collision = true;
+                break;
+            }
+        }
+    // }
+    return b_collision;
+}
+
+
+// fn f_a_a_o_object_2d__path_part_leading_to_option(
+//     o_game: &mut O_game, 
+//     n_x_start: f64,
+//     n_y_start: f64,
+// ) -> Vec<Vec<O_object_2d>> {
+
+//     let mut a_a_o_object_2d__path_part_leading_to_option : Vec<Vec<O_object_2d>> = Vec::new();
+//     let mut a_o_object2d : Vec<O_object_2d> = Vec::new();
+
+
+//     a_o_object2d = f_a_o_object_2d__path_part_until_options(
+//         o_game, 
+//         n_x_start + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+//         n_y_start
+//     );
+//     if(a_o_object2d.len() > 0){
+//         a_a_o_object_2d__path_part_leading_to_option.push(a_o_object2d);
+//     }
+//     a_o_object2d = f_a_o_object_2d__path_part_until_options(
+//         o_game, 
+//         n_x_start - o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x,
+//         n_y_start
+//     );
+//     if(a_o_object2d.len() > 0){
+//         a_a_o_object_2d__path_part_leading_to_option.push(a_o_object2d);
+//     }
+//     a_o_object2d = f_a_o_object_2d__path_part_until_options(
+//         o_game, 
+//         n_x_start,
+//         n_y_start+ o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y,
+//     );
+//     if(a_o_object2d.len() > 0){
+//         a_a_o_object_2d__path_part_leading_to_option.push(a_o_object2d);
+//     }
+//     a_o_object2d = f_a_o_object_2d__path_part_until_options(
+//         o_game, 
+//         n_x_start,
+//         n_y_start- o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y
+//     );
+//     if(a_o_object2d.len() > 0){
+//         a_a_o_object_2d__path_part_leading_to_option.push(a_o_object2d);
+//     }
+
+//     return a_a_o_object_2d__path_part_leading_to_option;
+    
+// }
+
+
+// fn f_a_o_object_2d__path_part_until_options(
+//     o_game: &mut O_game,
+//     n_x_start: f64,
+//     n_y_start: f64,
+// ) -> Vec<O_object_2d>{
+
+//     let mut a_o_object_2d__path_part_until_options_or_dead_end : Vec<O_object_2d> = Vec::new();
+
+//     let mut n_x_new = n_x_start;
+//     let mut n_y_new = n_y_start;
+
+//     let mut s_name_o_object_2d = "path";
+//     let mut b_dead_end = false; 
+//     let mut b_options_available = false;
+//     while(true){
+
+//         b_dead_end = false; 
+//         b_options_available = true;
+        
+//         let mut a_o_object_2d_movement_option = f_a_o_object_2d__movement_option(
+//             o_game, 
+//             n_x_new, 
+//             n_y_new    
+//         );
+        
+//         b_dead_end = a_o_object_2d__movement_option.len() == 0;
+//         b_options_available = a_o_object_2d__movement_option.len() > 1;  
+        
+//         if(
+//             !b_dead_end
+//             &&
+//             !b_options_available
+//         ){
+//             let o_object_2d = a_o_object_2d__movement_option.remove(0);
+            
+//             n_x_new = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
+//             n_y_new = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
+            
+//             a_o_object_2d__path_part_until_options_or_dead_end.push(
+//                 o_object_2d
+//             );        
+//         }
+
+//         if(
+//             b_dead_end
+//             || 
+//             b_options_available
+//         ){
+//             println!("(b_dead_end || b_options_available) equals true");
+//             break;
+//         }
+        
+//     }
+
+//     if(b_options_available && b_dead_end == false){
+//         return a_o_object_2d__path_part_until_options_or_dead_end;
+//     }else{
+//         return vec![]
+//     }
+//     // return a_o_object_2d__path_part_until_options_or_dead_end;
+            
+    
+// }
+
+
+// fn f_a_o_object_2d__path_part_to_target(
+//     o_game: &mut O_game,
+//     n_x_start: f64,
+//     n_y_start: f64,
+//     n_x_target: f64, 
+//     n_y_target: f64,     
+// )-> Vec<O_object_2d>{
+
+//     let mut a_o_object_2d__path_part_to_target : Vec<O_object_2d> = Vec::new();
+//     let mut a_a_o_object_2d__path_part_leading_to_option = f_a_a_o_object_2d__path_part_leading_to_option(
+//         o_game,
+//         n_x_start,
+//         n_y_start
+//     );
+
+//     b_unique_path = true;
+//     let mut n_index = 0;
+//     for a_o_object_2d__path_part_leading_to_option in  a_a_o_object_2d__path_part_leading_to_option.iter(){
+//         for o_object_2d__path_part_leading_to_option in a_o_object_2d__path_part_leading_to_option.iter(){
+//             for o_object_2d__path_part_to_target in a_o_object_2d__path_part_to_target.iter(){
+                
+//                 if(
+//                     o_object_2d__path_part_leading_to_option.o_spatialproperty__translation.o_point_2d__current.n_x 
+//                     == 
+//                     o_object_2d__path_part_to_target.o_spatialproperty__translation.o_point_2d__current.n_x 
+                    
+//                     &&
+//                     o_object_2d__path_part_leading_to_option.o_spatialproperty__translation.o_point_2d__current.n_y 
+//                     == 
+//                     o_object_2d__path_part_to_target.o_spatialproperty__translation.o_point_2d__current.n_y 
+//                 ){
+//                     b_unique_path = false;
+//                     break;
+//                 }
+//             }
+//             if(!b_unique_path){break;}
+//         }
+
+//         n_index+=1;
+//     }
+
+//     if(b_unique_path){
+//         a_o_object_2d__path_part_to_target.append(&mut a_a_o_object_2d__path_part_leading_to_option.remove(n_index));
+//     }
+
+//     return a_o_object_2d__path_part_to_target;
+//     // println!("a_a_o_object_2d__path_part_leading_to_option {:?}", a_a_o_object_2d__path_part_leading_to_option);
+//     // return a_a_o_object_2d__path_part_leading_to_option.remove(0);
+// }
 fn f_create_path_until_dead_end_random_choice(
     o_game: &mut O_game,
     n_x_start: f64,
@@ -619,7 +1272,7 @@ fn f_create_path_until_dead_end_random_choice(
             },
             // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
 
-            f_a_n_f64__color: f_a_n_f64__color__random_black
+            f_a_n_u8__color: f_a_n_u8__color__random_black
 
         }
     );
@@ -704,15 +1357,16 @@ fn f_create_path_until_dead_end_random_choice(
                         },
                         // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
 
-                        f_a_n_f64__color: |n_x: u32, n_y:u32, n_frame_id:u64, n_index_o_object_2d: usize| -> Vec<f64> {
+                        f_a_n_u8__color: |o_game: &O_game, o_object_2d: &O_object_2d, n_x: u32, n_y: u32| -> Vec<u8> {
                             let n_max_time = 33;
                             // let mut rng = rand::thread_rng();
                             // let n_start = (rng.gen::<f64>() * n_max_time as f64) as u64;
+                            let n_index_o_object_2d = 0;
                             vec![
-                                (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64),
-                                (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64),
-                                (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64),
-                                (((n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f64 / n_max_time as f64)
+                                ((((o_game.n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f32 / n_max_time as f32)* 255.0 ) as u8,
+                                ((((o_game.n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f32 / n_max_time as f32)* 255.0 ) as u8,
+                                ((((o_game.n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f32 / n_max_time as f32)* 255.0 ) as u8,
+                                ((((o_game.n_frame_id - n_index_o_object_2d as u64) % n_max_time) as f32 / n_max_time as f32)* 255.0 ) as u8
                             ]
                         }
                     }
@@ -787,7 +1441,7 @@ fn f_create_path_until_dead_end(
             },
             // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
 
-            f_a_n_f64__color: f_a_n_f64__color__random_black
+            f_a_n_u8__color: f_a_n_u8__color__random_black
 
         }
     );
@@ -870,7 +1524,7 @@ fn f_create_path_until_dead_end(
                         },
                         // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
             
-                        f_a_n_f64__color: f_a_n_f64__color__random_black
+                        f_a_n_u8__color: f_a_n_u8__color__random_black
             
                     }
                 );
@@ -904,6 +1558,7 @@ fn f_create_path_until_dead_end(
     
 
 }
+
 fn f_detect_labyrinth_from_image(
     o_game: &mut O_game
 ){
@@ -923,8 +1578,6 @@ fn f_detect_labyrinth_from_image(
     // let in_animation = reader.info().frame_control.is_some();
 
 
-    let n_channels: u32 = 4;
-    // let mut a_n_u8__image = vec![0; (n_image_pixels_x * n_image_pixels_y * n_channels).try_into().unwrap()];
     // let a_n_u8_pixel : [u8; n_pixels_x * n_pixels_y] = [222];
     let mut a_n_u8__image: Vec<u8> = bytes.iter().cloned().collect();
 
@@ -971,47 +1624,15 @@ fn f_detect_labyrinth_from_image(
         n_x = ( n_x + 1 ) % o_game.n_boxes_x;
         n_y = ((n_i as f32) / o_game.n_boxes_x as f32) as u32;
 
-        let mut o_object_2d_wall = O_object_2d{
-            s_name: String::from("wall"),
-            o_spatialproperty__translation: O_spatialproperty{
-                o_point_2d__current: O_point_2d{
-                    n_x : n_x as f64 * n_scale_x,
-                    n_y : n_y as f64 * n_scale_y
-                }, 
-                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-            },
-            o_spatialproperty__rotation: O_spatialproperty{
-                o_point_2d__current: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-            },
-            o_spatialproperty__scale: O_spatialproperty{
-                o_point_2d__current: O_point_2d{
-                    n_x: n_scale_x,
-                    n_y: n_scale_y
-                }, 
-                o_point_2d__velocity: O_point_2d{n_x: 0.0, n_y: 0.0}, 
-                o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
-            },
-            // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
-
-            f_a_n_f64__color: f_a_n_f64__color__red
-
-        };
-
-        let a_n_u8__subframe = f_a_rect_read_and_optional_write(
-            &mut a_n_u8__image,
-            n_image_pixels_x as u32, 
-            n_image_pixels_y as u32, 
-            n_channels as u32,
-            o_object_2d_wall.o_spatialproperty__translation.o_point_2d__current.n_x as u32,
-            o_object_2d_wall.o_spatialproperty__translation.o_point_2d__current.n_y as u32,
-            o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_x as u32,
-            o_object_2d_wall.o_spatialproperty__scale.o_point_2d__current.n_y as u32,
-            None, 
-            None, 
-            None
+        let a_n_u8__subframe = f_a_n_u8_read(
+            &a_n_u8__image, //a_n_u8__image: &Vec<u8>,
+            n_image_pixels_x,//n_image_scale_x: u32, 
+            n_image_pixels_y,//n_image_scale_y: u32, 
+            4,//n_image_channels: u32, 
+            (n_x as f64 * n_scale_x) as u32,//n_rect_translation_x: u32, 
+            (n_y as f64 * n_scale_y) as u32,//n_rect_translation_y: u32, 
+            n_scale_x as u32,//n_rect_scale_x: u32, 
+            n_scale_y as u32,//n_rect_scale_y: u32, 
         );
 
         let mut n_sum: u32 = 0; 
@@ -1056,9 +1677,9 @@ fn f_detect_labyrinth_from_image(
                         o_point_2d__acceleration: O_point_2d{n_x: 0.0, n_y: 0.0},
                     },
                     // a_n_f64__color: vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
-                    // a_n_f64__color: vec![0.0,0.0,0.0,0.0]
-                    f_a_n_f64__color: f_a_n_f64__color__red
-                    // a_n_f64__color:  vec![(n_avg / 255.0).into(), 0.0,0.0, 1.0]
+        
+                    f_a_n_u8__color: f_a_n_u8__color__wall
+        
                 }
             );
         }
