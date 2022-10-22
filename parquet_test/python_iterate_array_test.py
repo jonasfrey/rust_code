@@ -14,7 +14,6 @@ def f_iterate_numpy_array():
     print(f"n_sum: {n_sum}")
     print("done")
 
-
 def f_iterate_while_loop():
     n = 0
     n_sum = 0
@@ -44,8 +43,6 @@ def f_iterate_array_from_range():
     print("done")
 
 
-
-
 a_s_function_name = [
     "f_iterate_numpy_array",
     "f_iterate_while_loop",
@@ -67,9 +64,6 @@ for s_function_name in a_s_function_name:
     print(n)
     print(f"time delta seconds: {n_ts_seconds_delta}")
     
-
-
-
 
 
 if(len(sys.argv) > 1):
