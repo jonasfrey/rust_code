@@ -1,10 +1,9 @@
-from re import S
 import numpy 
 import sys
 import time
 import inspect
 
-n_max = 10000000
+n_max = 100000000
 
 def f_iterate_numpy_array():
     a_n = numpy.arange(1, n_max, 1, dtype=int)
@@ -47,9 +46,6 @@ def f_iterate_array_from_range():
 
 
 
-
-
-
 a_s_function_name = [
     "f_iterate_numpy_array",
     "f_iterate_while_loop",
@@ -59,14 +55,19 @@ a_s_function_name = [
 
 for s_function_name in a_s_function_name: 
     print("------------------------")
+    print(f"function name: '{s_function_name}'")
+    print(f"function body:")
+    a_s_line_function = inspect.getsource(f_iterate_array_from_range)
+    print(a_s_line_function)
+    print(f"function return:")
     n_ts_seconds_first = time.time()
-    locals()[s_function_name]()
+    n = locals()[s_function_name]()
     n_ts_seconds_second = time.time()
     n_ts_seconds_delta = n_ts_seconds_second - n_ts_seconds_first
-    a_s_line_function = inspect.getsource(f_iterate_array_from_range)
-    print(f"function: {s_function_name}")
-    print(a_s_line_function)
+    print(n)
     print(f"time delta seconds: {n_ts_seconds_delta}")
+    
+
 
 
 
