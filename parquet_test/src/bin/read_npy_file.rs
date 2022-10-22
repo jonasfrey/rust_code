@@ -36,20 +36,88 @@ use parquet::{
     schema::parser::parse_message_type,
 };
 
+
+
+macro_rules! f_match_and_assign_nso_to_o_light_curve{
+    // internal rule.
+
+    (
+        $s_prop_name:ident,
+        $s_name:expr,
+        $o_struct:expr,
+        $value: ident, 
+        $s_enum_name: ident, 
+        $s_data_type: ident
+    ) => {
+        // println!($i);
+        if(($s_name == stringify!($s_prop_name))){
+            // println!("value {:?}", value);
+            match $value {
+                parquet::record::Field::$s_enum_name(val)=> {
+                    let v: $s_data_type = *val;
+                    $o_struct.$s_prop_name = v;
+                    // std::process::exit(1);
+                },
+                _ => { 
+                    println!("match _");
+                }
+            }
+        }
+    }
+}
+macro_rules! f_match_and_assign_a_to_o_light_curve{
+    // internal rule.
+
+    (
+        $s_prop_name:ident,
+        $s_name:expr,
+        $o_struct:expr,
+        $value: ident, 
+        $s_enum_name: ident, 
+        $s_data_type: ident
+    ) => {
+
+        if(($s_name == stringify!($s_prop_name))){
+            // println!("value {:?}", value);
+            match $value {
+                parquet::record::Field::ListInternal(val)=> {
+                    // println!("{:?}",val.elements());
+                    for value in val.elements().iter(){
+                        match value{
+                            parquet::record::Field::$s_enum_name(val2) => {
+                                let v: $s_data_type = *val2;
+                                $o_struct.$s_prop_name.push(v);
+                            }, 
+                            _ => { 
+                                println!("match _");
+                            }
+                        }
+
+                    }
+                }, 
+                _ => { 
+                    println!("match _");
+                }
+            }
+        }
+
+    }
+}
+
 #[derive(Serialize)]
 struct O_light_curve {
-    objectid: i64,
-    filterid: u64,
-    fieldid: u64,
-    rcid: u64, 
-    objra: f64, 
-    objdec: f64, 
-    nepochs: u64, 
-    hmjd: Vec<f64>,
-    mag: Vec<f32>, 
-    magerr: Vec<f32>, 
-    clrcoeff: Vec<f32>, 
-    catflags: Vec<u32>
+    objectid: i64, //     int64 //wrong=>  int64
+    filterid: i64, //     int64 //wrong=>  uint8
+    fieldid: i64, //     int64 //wrong=>  int16
+    rcid: i64, //     int64 //wrong=>  uint8 
+    objra: f64, //     float64 //wrong=>  float32 
+    objdec: f64, //     float64 //wrong=>  float32 
+    nepochs: i64, //     int64 //wrong=>  int64 
+    hmjd: Vec<f64>, //     float64 //wrong=>  list[float32]
+    mag: Vec<f32>, //     float32 //wrong=>  list[float32] 
+    magerr: Vec<f32>, //     float32 //wrong=>  list[float32] 
+    clrcoeff: Vec<f32>, //     float32 //wrong=>  list[float32]
+    catflags: Vec<i32> //     int32 //wrong=> list[uint16]
 }
 fn f_print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
@@ -73,6 +141,7 @@ fn f_exmaple_read_single_file(
         let parquet_metadata = reader.metadata();
         // assert_eq!(parquet_metadata.num_row_groups(), 1);
         println!("parquet_metadata {:?}", parquet_metadata);
+        // std::process::exit(1);
         // std::process::exit(1);
         // println!("parquet_metadata.file_metadata().num_rows() {:?}", parquet_metadata.file_metadata().num_rows());
         let row_group_reader = reader.get_row_group(0).unwrap();
@@ -106,29 +175,24 @@ fn f_exmaple_read_single_file(
 
             for (idx, (s_name, value)) in o_row.get_column_iter().enumerate() {
                 // println!("column index: {}, column name: {}, column value: {}", idx, s_name, value);
-                // println!()
-                if((s_name == "objectid")){
-                    println!("value {:?}", value);
-                    match value {
-                        parquet::record::Field::Long(val)=> {
-                            let test: i64 = *val;
-                            o_light_curve.objectid = test;
-                            // std::process::exit(1);
-                        }, 
-                        _ => { 
-                            println!("match _");
-                        }
-                    }
-                    // match value {
-                    //     parquet::record::Field(_, value) => println!("value: {}", value),
-                    //     _ => println!("Something else"),
-                    // }
-                    // let mut n_i64: i64 = value;
-                    // println!("val {:?}", parquet::record::Field::convert_int64(value, n_i64));
-                    // println!("val {:?}", value);
-                    // println!("f_print_type_of {:?}", f_print_type_of(value));
-                    // o_light_curve.objectid = *&value.convert_int64();
-                }
+                // // println!()
+
+                f_match_and_assign_nso_to_o_light_curve!(objectid, s_name, o_light_curve, value, Long, i64);
+                f_match_and_assign_nso_to_o_light_curve!(filterid, s_name, o_light_curve, value, Long, i64);
+                f_match_and_assign_nso_to_o_light_curve!(fieldid, s_name, o_light_curve, value, Long, i64);
+                f_match_and_assign_nso_to_o_light_curve!(rcid, s_name, o_light_curve, value, Long, i64);
+                f_match_and_assign_nso_to_o_light_curve!(objra, s_name, o_light_curve, value, Double, f64);
+                f_match_and_assign_nso_to_o_light_curve!(objdec, s_name, o_light_curve, value, Double, f64);
+                f_match_and_assign_nso_to_o_light_curve!(nepochs, s_name, o_light_curve, value, Long, i64);
+                // arrays
+                f_match_and_assign_a_to_o_light_curve!(hmjd, s_name, o_light_curve, value, Double, f64);
+                f_match_and_assign_a_to_o_light_curve!(mag, s_name, o_light_curve, value, Float, f32);
+                f_match_and_assign_a_to_o_light_curve!(magerr, s_name, o_light_curve, value, Float, f32);
+                f_match_and_assign_a_to_o_light_curve!(clrcoeff, s_name, o_light_curve, value, Float, f32);
+                f_match_and_assign_a_to_o_light_curve!(catflags, s_name, o_light_curve, value, Int, i32);
+
+                println!("o_light_curve.objectid {:?}", o_light_curve.objectid);
+
                 // std::process::exit(1);
 
                 // println!("column index: {}, column name: {}, column value: {}", idx, name, field);
@@ -256,18 +320,18 @@ fn f_convert_npy_to_parquet(
 }
 #[show_image::main]
 fn main() {
-    // let s_path_file_original = "ztf_000722_zr_c07_q4_dr11.parquet_filtered.npy";
-    // let s_path_file_npy = String::from(s_path_file_original.clone());
-    // let mut s_path_file_parquet = String::from(s_path_file_npy.clone()); 
-    // let mut s_extension_parquet = String::from(".parquet");
-    // s_path_file_parquet.push_str(&mut s_extension_parquet);
+    let s_path_file_original = "ztf_000722_zr_c07_q4_dr11.parquet_filtered.npy";
+    let s_path_file_npy = String::from(s_path_file_original.clone());
+    let mut s_path_file_parquet = String::from(s_path_file_npy.clone()); 
+    let mut s_extension_parquet = String::from(".parquet");
+    s_path_file_parquet.push_str(&mut s_extension_parquet);
 
-    // f_convert_npy_to_parquet(&s_path_file_npy);
-    // // println!("done first!");
-    // f_exmaple_read_single_file(&s_path_file_parquet);
-    // // f_example_read_multiple_files();
+    f_convert_npy_to_parquet(&s_path_file_npy);
+    // println!("done first!");
+    f_exmaple_read_single_file(&s_path_file_parquet);
+    // f_example_read_multiple_files();
 
-    f_animate_microlensing_theoretical();
+    // f_animate_microlensing_theoretical();
 }
 
 fn f_microlensing_theoretical(
@@ -630,10 +694,8 @@ fn f_animate_microlensing_theoretical(){
     let o_device_state = DeviceState::new();
 
 
-
     let a_n_u8__color_clear = vec![0,0,255,1];
     let mut n_time : u64 = 0;
-    
 
     let mut a_n_param = vec![
         String::from("n_umin"),
@@ -791,5 +853,3 @@ fn f_animate_microlensing_theoretical(){
         b_space_down_last = b_space_down;
     }
 }
-
-
