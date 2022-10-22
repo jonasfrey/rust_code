@@ -1,0 +1,1194 @@
+{
+    file_metadata: FileMetaData {
+        version: 2,
+        num_rows: 996,
+        created_by: Some("parquet-cpp-arrow version 9.0.0"),
+        key_value_metadata: Some([KeyValue {
+            key: "pandas",
+            value: Some(
+                "{\"index_columns\": [{\"kind\": \"range\", \"name\": null, \"start\": 0, \"stop\": 996, \"step\": 1}], \"column_indexes\": [{\"name\": null, \"field_name\": null, \"pandas_type\": \"unicode\", \"numpy_type\": \"object\", \"metadata\": {\"encoding\": \"UTF-8\"}}], \"columns\": [{\"name\": \"objectid\", \"field_name\": \"objectid\", \"pandas_type\": \"int64\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"filterid\", \"field_name\": \"filterid\", \"pandas_type\": \"int64\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"fieldid\", \"field_name\": \"fieldid\", \"pandas_type\": \"int64\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"rcid\", \"field_name\": \"rcid\", \"pandas_type\": \"int64\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"objra\", \"field_name\": \"objra\", \"pandas_type\": \"float64\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"objdec\", \"field_name\": \"objdec\", \"pandas_type\": \"float64\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"nepochs\", \"field_name\": \"nepochs\", \"pandas_type\": \"int64\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"hmjd\", \"field_name\": \"hmjd\", \"pandas_type\": \"list[float64]\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"mag\", \"field_name\": \"mag\", \"pandas_type\": \"list[float32]\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"magerr\", \"field_name\": \"magerr\", \"pandas_type\": \"list[float32]\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"clrcoeff\", \"field_name\": \"clrcoeff\", \"pandas_type\": \"list[float32]\", \"numpy_type\": \"object\", \"metadata\": null}, {\"name\": \"catflags\", \"field_name\": \"catflags\", \"pandas_type\": \"list[int32]\", \"numpy_type\": \"object\", \"metadata\": null}], \"creator\": {\"library\": \"pyarrow\", \"version\": \"9.0.0\"}, \"pandas_version\": \"1.4.2\"}"
+                )
+        }, KeyValue {
+            key: "ARROW:schema",
+            value: Some(
+                "/////2AKAAAQAAAAAAAKAA4ABgAFAAgACgAAAAABBAAQAAAAAAAKAAwAAAAEAAgACgAAANAGAAAEAAAAAQAAAAwAAAAIAAwABAAIAAgAAAAIAAAAEAAAAAYAAABwYW5kYXMAAJoGAAB7ImluZGV4X2NvbHVtbnMiOiBbeyJraW5kIjogInJhbmdlIiwgIm5hbWUiOiBudWxsLCAic3RhcnQiOiAwLCAic3RvcCI6IDk5NiwgInN0ZXAiOiAxfV0sICJjb2x1bW5faW5kZXhlcyI6IFt7Im5hbWUiOiBudWxsLCAiZmllbGRfbmFtZSI6IG51bGwsICJwYW5kYXNfdHlwZSI6ICJ1bmljb2RlIiwgIm51bXB5X3R5cGUiOiAib2JqZWN0IiwgIm1ldGFkYXRhIjogeyJlbmNvZGluZyI6ICJVVEYtOCJ9fV0sICJjb2x1bW5zIjogW3sibmFtZSI6ICJvYmplY3RpZCIsICJmaWVsZF9uYW1lIjogIm9iamVjdGlkIiwgInBhbmRhc190eXBlIjogImludDY0IiwgIm51bXB5X3R5cGUiOiAib2JqZWN0IiwgIm1ldGFkYXRhIjogbnVsbH0sIHsibmFtZSI6ICJmaWx0ZXJpZCIsICJmaWVsZF9uYW1lIjogImZpbHRlcmlkIiwgInBhbmRhc190eXBlIjogImludDY0IiwgIm51bXB5X3R5cGUiOiAib2JqZWN0IiwgIm1ldGFkYXRhIjogbnVsbH0sIHsibmFtZSI6ICJmaWVsZGlkIiwgImZpZWxkX25hbWUiOiAiZmllbGRpZCIsICJwYW5kYXNfdHlwZSI6ICJpbnQ2NCIsICJudW1weV90eXBlIjogIm9iamVjdCIsICJtZXRhZGF0YSI6IG51bGx9LCB7Im5hbWUiOiAicmNpZCIsICJmaWVsZF9uYW1lIjogInJjaWQiLCAicGFuZGFzX3R5cGUiOiAiaW50NjQiLCAibnVtcHlfdHlwZSI6ICJvYmplY3QiLCAibWV0YWRhdGEiOiBudWxsfSwgeyJuYW1lIjogIm9ianJhIiwgImZpZWxkX25hbWUiOiAib2JqcmEiLCAicGFuZGFzX3R5cGUiOiAiZmxvYXQ2NCIsICJudW1weV90eXBlIjogIm9iamVjdCIsICJtZXRhZGF0YSI6IG51bGx9LCB7Im5hbWUiOiAib2JqZGVjIiwgImZpZWxkX25hbWUiOiAib2JqZGVjIiwgInBhbmRhc190eXBlIjogImZsb2F0NjQiLCAibnVtcHlfdHlwZSI6ICJvYmplY3QiLCAibWV0YWRhdGEiOiBudWxsfSwgeyJuYW1lIjogIm5lcG9jaHMiLCAiZmllbGRfbmFtZSI6ICJuZXBvY2hzIiwgInBhbmRhc190eXBlIjogImludDY0IiwgIm51bXB5X3R5cGUiOiAib2JqZWN0IiwgIm1ldGFkYXRhIjogbnVsbH0sIHsibmFtZSI6ICJobWpkIiwgImZpZWxkX25hbWUiOiAiaG1qZCIsICJwYW5kYXNfdHlwZSI6ICJsaXN0W2Zsb2F0NjRdIiwgIm51bXB5X3R5cGUiOiAib2JqZWN0IiwgIm1ldGFkYXRhIjogbnVsbH0sIHsibmFtZSI6ICJtYWciLCAiZmllbGRfbmFtZSI6ICJtYWciLCAicGFuZGFzX3R5cGUiOiAibGlzdFtmbG9hdDMyXSIsICJudW1weV90eXBlIjogIm9iamVjdCIsICJtZXRhZGF0YSI6IG51bGx9LCB7Im5hbWUiOiAibWFnZXJyIiwgImZpZWxkX25hbWUiOiAibWFnZXJyIiwgInBhbmRhc190eXBlIjogImxpc3RbZmxvYXQzMl0iLCAibnVtcHlfdHlwZSI6ICJvYmplY3QiLCAibWV0YWRhdGEiOiBudWxsfSwgeyJuYW1lIjogImNscmNvZWZmIiwgImZpZWxkX25hbWUiOiAiY2xyY29lZmYiLCAicGFuZGFzX3R5cGUiOiAibGlzdFtmbG9hdDMyXSIsICJudW1weV90eXBlIjogIm9iamVjdCIsICJtZXRhZGF0YSI6IG51bGx9LCB7Im5hbWUiOiAiY2F0ZmxhZ3MiLCAiZmllbGRfbmFtZSI6ICJjYXRmbGFncyIsICJwYW5kYXNfdHlwZSI6ICJsaXN0W2ludDMyXSIsICJudW1weV90eXBlIjogIm9iamVjdCIsICJtZXRhZGF0YSI6IG51bGx9XSwgImNyZWF0b3IiOiB7ImxpYnJhcnkiOiAicHlhcnJvdyIsICJ2ZXJzaW9uIjogIjkuMC4wIn0sICJwYW5kYXNfdmVyc2lvbiI6ICIxLjQuMiJ9AAAMAAAAJAMAANwCAACoAgAAdAIAAEACAAAQAgAA3AEAAHwBAAAkAQAAyAAAAGgAAAAEAAAAHP3//wAAAQwUAAAAIAAAAAQAAAABAAAAGAAAAAgAAABjYXRmbGFncwAAAACc/v//TP3//wAAAQIQAAAAGAAAAAQAAAAAAAAABAAAAGl0ZW0AAAAAOP3//wAAAAEgAAAAfP3//wAAAQwUAAAAIAAAAAQAAAABAAAAGAAAAAgAAABjbHJjb2VmZgAAAAD8/v//rP3//wAAAQMQAAAAGAAAAAQAAAAAAAAABAAAAGl0ZW0AAAAAcv7//wAAAQDY/f//AAABDBQAAAAcAAAABAAAAAEAAAAUAAAABgAAAG1hZ2VycgAAVP///wT+//8AAAEDEAAAABgAAAAEAAAAAAAAAAQAAABpdGVtAAAAAMr+//8AAAEAMP7//wAAAQwUAAAAGAAAAAQAAAABAAAAEAAAAAMAAABtYWcAqP///1j+//8AAAEDEAAAABgAAAAEAAAAAAAAAAQAAABpdGVtAAAAAB7///8AAAEAhP7//wAAAQwUAAAAIAAAAAQAAAABAAAAGAAAAAQAAABobWpkAAAAAAQABAAEAAAAtP7//wAAAQMQAAAAGAAAAAQAAAAAAAAABAAAAGl0ZW0AAAAAev///wAAAgDg/v//AAABAhAAAAAYAAAABAAAAAAAAAAHAAAAbmVwb2NocwDM/v//AAAAAUAAAAAQ////AAABAxAAAAAYAAAABAAAAAAAAAAGAAAAb2JqZGVjAADW////AAACADz///8AAAEDEAAAABwAAAAEAAAAAAAAAAUAAABvYmpyYQAGAAgABgAGAAAAAAACAGz///8AAAECEAAAABgAAAAEAAAAAAAAAAQAAAByY2lkAAAAAFj///8AAAABQAAAAJz///8AAAECEAAAABgAAAAEAAAAAAAAAAcAAABmaWVsZGlkAIj///8AAAABQAAAAMz///8AAAECEAAAABwAAAAEAAAAAAAAAAgAAABmaWx0ZXJpZAAAAAC8////AAAAAUAAAAAQABQACAAGAAcADAAAABAAEAAAAAAAAQIQAAAAJAAAAAQAAAAAAAAACAAAAG9iamVjdGlkAAAAAAgADAAIAAcACAAAAAAAAAFAAAAA"
+                )
+        }]),
+        schema_descr: SchemaDescriptor {
+            schema: GroupType {
+                basic_info: BasicTypeInfo {
+                    name: "schema",
+                    repetition: None,
+                    converted_type: NONE,
+                    logical_type: None,
+                    id: None
+                },
+                fields: [PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objectid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "filterid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "fieldid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "rcid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objra",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: DOUBLE,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objdec",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: DOUBLE,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "nepochs",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "hmjd",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: DOUBLE,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "mag",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: FLOAT,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "magerr",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: FLOAT,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "clrcoeff",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: FLOAT,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "catflags",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: INT32,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }]
+            }
+        },
+        column_orders: Some([TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED),
+            TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED),
+            TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED), TYPE_DEFINED_ORDER(SIGNED)
+        ])
+    },
+    row_groups: [RowGroupMetaData {
+        columns: [ColumnChunkMetaData {
+            column_type: INT64,
+            column_path: ColumnPath {
+                parts: ["objectid"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objectid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 1,
+                max_rep_level: 0,
+                path: ColumnPath {
+                    parts: ["objectid"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 5505,
+            num_values: 996,
+            compression: SNAPPY,
+            total_compressed_size: 5501,
+            total_uncompressed_size: 9309,
+            data_page_offset: 4176,
+            index_page_offset: None,
+            dictionary_page_offset: Some(4),
+            statistics: Some(Int64({
+                min: Some(722207400000187),
+                max: Some(722207400042300),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: INT64,
+            column_path: ColumnPath {
+                parts: ["filterid"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "filterid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 1,
+                max_rep_level: 0,
+                path: ColumnPath {
+                    parts: ["filterid"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 5705,
+            num_values: 996,
+            compression: SNAPPY,
+            total_compressed_size: 99,
+            total_uncompressed_size: 95,
+            data_page_offset: 5630,
+            index_page_offset: None,
+            dictionary_page_offset: Some(5606),
+            statistics: Some(Int64({
+                min: Some(2),
+                max: Some(2),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: INT64,
+            column_path: ColumnPath {
+                parts: ["fieldid"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "fieldid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 1,
+                max_rep_level: 0,
+                path: ColumnPath {
+                    parts: ["fieldid"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 5905,
+            num_values: 996,
+            compression: SNAPPY,
+            total_compressed_size: 99,
+            total_uncompressed_size: 95,
+            data_page_offset: 5830,
+            index_page_offset: None,
+            dictionary_page_offset: Some(5806),
+            statistics: Some(Int64({
+                min: Some(722),
+                max: Some(722),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: INT64,
+            column_path: ColumnPath {
+                parts: ["rcid"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "rcid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 1,
+                max_rep_level: 0,
+                path: ColumnPath {
+                    parts: ["rcid"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 6104,
+            num_values: 996,
+            compression: SNAPPY,
+            total_compressed_size: 99,
+            total_uncompressed_size: 95,
+            data_page_offset: 6029,
+            index_page_offset: None,
+            dictionary_page_offset: Some(6005),
+            statistics: Some(Int64({
+                min: Some(27),
+                max: Some(27),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: DOUBLE,
+            column_path: ColumnPath {
+                parts: ["objra"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objra",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: DOUBLE,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 1,
+                max_rep_level: 0,
+                path: ColumnPath {
+                    parts: ["objra"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 12404,
+            num_values: 996,
+            compression: SNAPPY,
+            total_compressed_size: 6203,
+            total_uncompressed_size: 9245,
+            data_page_offset: 11075,
+            index_page_offset: None,
+            dictionary_page_offset: Some(6201),
+            statistics: Some(Double({
+                min: Some(242.75938415527344),
+                max: Some(243.85787963867188),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: DOUBLE,
+            column_path: ColumnPath {
+                parts: ["objdec"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objdec",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: DOUBLE,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 1,
+                max_rep_level: 0,
+                path: ColumnPath {
+                    parts: ["objdec"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 18929,
+            num_values: 996,
+            compression: SNAPPY,
+            total_compressed_size: 6424,
+            total_uncompressed_size: 9301,
+            data_page_offset: 17600,
+            index_page_offset: None,
+            dictionary_page_offset: Some(12505),
+            statistics: Some(Double({
+                min: Some(38.74922180175781),
+                max: Some(39.603294372558594),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: INT64,
+            column_path: ColumnPath {
+                parts: ["nepochs"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "nepochs",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 1,
+                max_rep_level: 0,
+                path: ColumnPath {
+                    parts: ["nepochs"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 21012,
+            num_values: 996,
+            compression: SNAPPY,
+            total_compressed_size: 1980,
+            total_uncompressed_size: 2827,
+            data_page_offset: 19933,
+            index_page_offset: None,
+            dictionary_page_offset: Some(19032),
+            statistics: Some(Int64({
+                min: Some(31),
+                max: Some(414),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: DOUBLE,
+            column_path: ColumnPath {
+                parts: ["hmjd", "list", "item"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "item",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: DOUBLE,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 3,
+                max_rep_level: 1,
+                path: ColumnPath {
+                    parts: ["hmjd", "list", "item"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 245270,
+            num_values: 92134,
+            compression: SNAPPY,
+            total_compressed_size: 224155,
+            total_uncompressed_size: 238220,
+            data_page_offset: 81334,
+            index_page_offset: None,
+            dictionary_page_offset: Some(21115),
+            statistics: Some(Double({
+                min: Some(58198.39534),
+                max: Some(59641.49064),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: FLOAT,
+            column_path: ColumnPath {
+                parts: ["mag", "list", "item"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "item",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: FLOAT,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 3,
+                max_rep_level: 1,
+                path: ColumnPath {
+                    parts: ["mag", "list", "item"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 786134,
+            num_values: 92134,
+            compression: SNAPPY,
+            total_compressed_size: 540751,
+            total_uncompressed_size: 542751,
+            data_page_offset: 587660,
+            index_page_offset: None,
+            dictionary_page_offset: Some(245383),
+            statistics: Some(Float({
+                min: Some(13.278211),
+                max: Some(22.770472),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: FLOAT,
+            column_path: ColumnPath {
+                parts: ["magerr", "list", "item"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "item",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: FLOAT,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 3,
+                max_rep_level: 1,
+                path: ColumnPath {
+                    parts: ["magerr", "list", "item"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 1326969,
+            num_values: 92134,
+            compression: SNAPPY,
+            total_compressed_size: 540739,
+            total_uncompressed_size: 542739,
+            data_page_offset: 1128495,
+            index_page_offset: None,
+            dictionary_page_offset: Some(786230),
+            statistics: Some(Float({
+                min: Some(0.011163042),
+                max: Some(0.3404312),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: FLOAT,
+            column_path: ColumnPath {
+                parts: ["clrcoeff", "list", "item"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "item",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: FLOAT,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 3,
+                max_rep_level: 1,
+                path: ColumnPath {
+                    parts: ["clrcoeff", "list", "item"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 1460596,
+            num_values: 92134,
+            compression: SNAPPY,
+            total_compressed_size: 133526,
+            total_uncompressed_size: 135546,
+            data_page_offset: 1331228,
+            index_page_offset: None,
+            dictionary_page_offset: Some(1327070),
+            statistics: Some(Float({
+                min: Some(0.07963461),
+                max: Some(0.14822719),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }, ColumnChunkMetaData {
+            column_type: INT32,
+            column_path: ColumnPath {
+                parts: ["catflags", "list", "item"]
+            },
+            column_descr: ColumnDescriptor {
+                primitive_type: PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "item",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT32,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                },
+                max_def_level: 3,
+                max_rep_level: 1,
+                path: ColumnPath {
+                    parts: ["catflags", "list", "item"]
+                }
+            },
+            encodings: [RLE_DICTIONARY, PLAIN, RLE],
+            file_path: None,
+            file_offset: 1463217,
+            num_values: 92134,
+            compression: SNAPPY,
+            total_compressed_size: 2517,
+            total_uncompressed_size: 4543,
+            data_page_offset: 1460720,
+            index_page_offset: None,
+            dictionary_page_offset: Some(1460700),
+            statistics: Some(Int32({
+                min: Some(0),
+                max: Some(0),
+                distinct_count: None,
+                null_count: 0,
+                min_max_deprecated: false
+            })),
+            encoding_stats: Some([PageEncodingStats {
+                page_type: DICTIONARY_PAGE,
+                encoding: PLAIN,
+                count: 1
+            }, PageEncodingStats {
+                page_type: DATA_PAGE,
+                encoding: RLE_DICTIONARY,
+                count: 1
+            }]),
+            bloom_filter_offset: None,
+            offset_index_offset: None,
+            offset_index_length: None,
+            column_index_offset: None,
+            column_index_length: None
+        }],
+        num_rows: 996,
+        total_byte_size: 1494766,
+        schema_descr: SchemaDescriptor {
+            schema: GroupType {
+                basic_info: BasicTypeInfo {
+                    name: "schema",
+                    repetition: None,
+                    converted_type: NONE,
+                    logical_type: None,
+                    id: None
+                },
+                fields: [PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objectid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "filterid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "fieldid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "rcid",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objra",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: DOUBLE,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "objdec",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: DOUBLE,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, PrimitiveType {
+                    basic_info: BasicTypeInfo {
+                        name: "nepochs",
+                        repetition: Some(OPTIONAL),
+                        converted_type: NONE,
+                        logical_type: None,
+                        id: None
+                    },
+                    physical_type: INT64,
+                    type_length: -1,
+                    scale: -1,
+                    precision: -1
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "hmjd",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: DOUBLE,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "mag",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: FLOAT,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "magerr",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: FLOAT,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "clrcoeff",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: FLOAT,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }, GroupType {
+                    basic_info: BasicTypeInfo {
+                        name: "catflags",
+                        repetition: Some(OPTIONAL),
+                        converted_type: LIST,
+                        logical_type: Some(List),
+                        id: None
+                    },
+                    fields: [GroupType {
+                        basic_info: BasicTypeInfo {
+                            name: "list",
+                            repetition: Some(REPEATED),
+                            converted_type: NONE,
+                            logical_type: None,
+                            id: None
+                        },
+                        fields: [PrimitiveType {
+                            basic_info: BasicTypeInfo {
+                                name: "item",
+                                repetition: Some(OPTIONAL),
+                                converted_type: NONE,
+                                logical_type: None,
+                                id: None
+                            },
+                            physical_type: INT32,
+                            type_length: -1,
+                            scale: -1,
+                            precision: -1
+                        }]
+                    }]
+                }]
+            }
+        },
+        page_offset_index: None
+    }],
+    page_indexes: None,
+    offset_indexes: None
+}
