@@ -114,10 +114,16 @@ struct O_light_curve {
     objdec: f64, //     float64 //wrong=>  float32 
     nepochs: i64, //     int64 //wrong=>  int64 
     hmjd: Vec<f64>, //     float64 //wrong=>  list[float32]
-    mag: Vec<f32>, //     float32 //wrong=>  list[float32] 
+    a_n_hours_modified_julian_date_estimated:Vec<f64>,
+    mag: Vec<f32>, //     float32 //wrong=>  list[float32]
+    a_n_magnitude_estimated:Vec<f64>,
     magerr: Vec<f32>, //     float32 //wrong=>  list[float32] 
     clrcoeff: Vec<f32>, //     float32 //wrong=>  list[float32]
-    catflags: Vec<i32> //     int32 //wrong=> list[uint16]
+    catflags: Vec<i32>, //     int32 //wrong=> list[uint16]
+    n_umin_estimated: f64,
+    n_tE_estimated: f64,
+    n_I_estimated: f64,
+    n_t_max_estimated: f64,
 }
 fn f_print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
@@ -167,10 +173,16 @@ fn f_exmaple_read_single_file(
                 objdec: 0.0, 
                 nepochs: 0, 
                 hmjd: Vec::new(),
+                a_n_hours_modified_julian_date_estimated: Vec::new(),
                 mag: Vec::new(), 
+                a_n_magnitude_estimated: Vec::new(), 
                 magerr: Vec::new(), 
                 clrcoeff: Vec::new(), 
-                catflags: Vec::new()
+                catflags: Vec::new(),
+                n_umin_estimated: 0.0,
+                n_tE_estimated: 0.0,
+                n_I_estimated: 0.0,
+                n_t_max_estimated: 0.0,
             };
 
             let mut n_difference_min = 111111.0;
@@ -234,6 +246,8 @@ fn f_exmaple_read_single_file(
                             let n_max = (n_mag_max - (0.5*n_tE as f32))as u32; 
                             for n_t_max in n_min..n_max{
                                 // let a_n : Vec<f64> = Vec::new();
+                                let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
+                                let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
                                 let mut n_sum_difference_theo_data_mean = 0.0;
                                 for n_index_mag in 0..a_n_mag.len(){
                                     // d, umin, tE, I, t_max
@@ -246,10 +260,14 @@ fn f_exmaple_read_single_file(
                                         f32::powf(10.0, (n_mag as f32 / -2.5)) as f64,
                                         n_t_max as f64
                                     );
+                                    a_n_hours_modified_julian_date_estimated.push(n_t);
+                                    a_n_magnitude_estimated.push(n_theo);
                                     n_sum_difference_theo_data_mean+=n_theo.abs() - n_mag as f64;
                                 }
                                 a_n_difference.push(n_sum_difference_theo_data_mean);
                                 if(n_sum_difference_theo_data_mean < n_difference_min){
+                                    o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
+                                    o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
                                     n_difference_min = n_sum_difference_theo_data_mean;
                                 }
                                 // let n_difference_theo_data_mean = 
