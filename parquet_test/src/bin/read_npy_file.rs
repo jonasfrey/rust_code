@@ -242,42 +242,47 @@ fn f_exmaple_read_single_file(
                     for n_count in 1..100{
                         let n_umin = n_count as f32 * 0.01;
                         for n_tE in n_min_tE..n_max_tE{
-                            let n_min = (n_mag_min + (0.5*n_tE as f32))as u32; 
-                            let n_max = (n_mag_max - (0.5*n_tE as f32))as u32; 
-                            for n_t_max in n_min..n_max{
-                                // let a_n : Vec<f64> = Vec::new();
-                                let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
-                                let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
-                                let mut n_sum_difference_theo_data_mean = 0.0;
-                                for n_index_mag in 0..a_n_mag.len(){
-                                    // d, umin, tE, I, t_max
-                                    let n_mag = a_n_mag[n_index_mag]; 
-                                    let n_t = a_n_t[n_index_mag];
-                                    let n_microlensing_theoretical = f_n_microlensing_theoretical(
-                                        n_t, 
-                                        n_umin as f64, 
-                                        n_tE as f64, 
-                                        f32::powf(10.0, (n_mag as f32 / -2.5)) as f64,
-                                        n_t_max as f64
-                                    );
-                                    // println!("n_mag {:?}", n_mag);
-                                    // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
-                                    a_n_hours_modified_julian_date_estimated.push(n_t);
-                                    a_n_magnitude_estimated.push(n_microlensing_theoretical);
-                                    n_sum_difference_theo_data_mean+=n_microlensing_theoretical.abs() - n_mag as f64;
-                                }
+                            for n_mag2 in 100*n_mag_min as i64 ..100*n_mag_max as i64{
+                                let n_mag2_f32 = n_mag2 as f32 * 0.01;
                                 
-                                a_n_difference.push(n_sum_difference_theo_data_mean);
-
-                                o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
-                                o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
-                                if(n_sum_difference_theo_data_mean < n_difference_min){
-                                    o_light_curve.n_umin_estimated = n_umin as f64;
-                                    o_light_curve.n_t_max_estimated = n_t_max as f64;
-                                    n_difference_min = n_sum_difference_theo_data_mean;
+                                let n_min = (n_mag_min + (0.5*n_tE as f32))as u32; 
+                                let n_max = (n_mag_max - (0.5*n_tE as f32))as u32; 
+                                for n_t_max in n_min..n_max{
+                                    // let a_n : Vec<f64> = Vec::new();
+                                    let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
+                                    let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
+                                    let mut n_sum_difference_theo_data_mean = 0.0;
+                                    for n_index_mag in 0..a_n_mag.len(){
+                                        // d, umin, tE, I, t_max
+                                        let n_mag = a_n_mag[n_index_mag]; 
+                                        let n_t = a_n_t[n_index_mag];
+                                        let n_microlensing_theoretical = f_n_microlensing_theoretical(
+                                            n_t, 
+                                            n_umin as f64, 
+                                            n_tE as f64, 
+                                            f32::powf(10.0, (n_mag2_f32 / -2.5)) as f64,
+                                            n_t_max as f64
+                                        );
+                                        // println!("n_mag {:?}", n_mag);
+                                        // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
+                                        a_n_hours_modified_julian_date_estimated.push(n_t);
+                                        a_n_magnitude_estimated.push(n_microlensing_theoretical);
+                                        n_sum_difference_theo_data_mean+=(n_microlensing_theoretical - n_mag as f64).abs();
+                                    }
+                                    
+                                    a_n_difference.push(n_sum_difference_theo_data_mean);
+    
+                                    o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
+                                    o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
+                                    if(n_sum_difference_theo_data_mean < n_difference_min){
+                                        o_light_curve.n_umin_estimated = n_umin as f64;
+                                        o_light_curve.n_t_max_estimated = n_t_max as f64;
+                                        n_difference_min = n_sum_difference_theo_data_mean;
+                                    }
+                                    // let n_difference_theo_data_mean = 
                                 }
-                                // let n_difference_theo_data_mean = 
                             }
+                            
                         }
                     }
 
@@ -325,9 +330,9 @@ fn f_exmaple_read_single_file(
                 println!("n_difference_min {:?}",n_difference_min);
                 a_o_light_curve__optimal_difference.push(o_light_curve);
             }
-            // else{
-            //     a_o_light_curve__optimal_difference.push(o_light_curve);
-            // }
+            else{
+                a_o_light_curve__optimal_difference.push(o_light_curve);
+            }
 
             n_index+=1;
         }
@@ -447,8 +452,9 @@ fn f_convert_npy_to_parquet(
     println!("s_output {:?}", s_output);
 
 }
-#[show_image::main]
-fn main() {
+
+fn f_convert_npy_to_parquet_and_create_json(){
+    
     let s_path_file_original = "ztf_000722_zr_c07_q4_dr11.parquet_filtered.npy";
     let s_path_file_npy = String::from(s_path_file_original.clone());
     let mut s_path_file_parquet = String::from(s_path_file_npy.clone()); 
@@ -458,9 +464,27 @@ fn main() {
     f_convert_npy_to_parquet(&s_path_file_npy);
     // println!("done first!");
     f_exmaple_read_single_file(&s_path_file_parquet);
-    // f_example_read_multiple_files();
+}
 
-    // f_animate_microlensing_theoretical();
+#[show_image::main]
+fn main() {
+
+    let a_s_arg: Vec<String> = std::env::args().collect();
+    let mut b_function_called = false;
+    if(a_s_arg.len() == 1){
+        f_convert_npy_to_parquet_and_create_json();
+    }else{
+        if(
+            a_s_arg[1] == String::from("f_convert_npy_to_parquet_and_create_json")
+        ){
+            f_convert_npy_to_parquet_and_create_json();
+        }
+        if(a_s_arg[1] == String::from("f_animate_microlensing_theoretical")){
+            f_animate_microlensing_theoretical();
+        }
+    }
+    println!("a_s_arg {:?}", a_s_arg);
+
 }
 
 // def ML_theo(d, umin, tE, I, t_max): #theoretische ML-Funktion, input = time-array, output = mag-array
@@ -918,15 +942,19 @@ fn f_animate_microlensing_theoretical(){
 
         if(a_n_param[n_index_a_n_param]  == String::from("n_umin")){
             n_umin = 1.0 * n_mouse_x_normalized;
+            println!("n_umin : {:?}", n_umin);
         }
         if(a_n_param[n_index_a_n_param]  == String::from("n_tE")){
             n_tE = 1000.0 * n_mouse_x_normalized;
+            println!("n_tE : {:?}", n_tE);
         }
         if(a_n_param[n_index_a_n_param]  == String::from("n_I")){
             n_I = 1.0 * n_mouse_x_normalized;
+            println!("n_I : {:?}", n_I);
         }
         if(a_n_param[n_index_a_n_param]  == String::from("n_t_max")){
             n_t_max = n_x_max as f64 * n_mouse_x_normalized;
+            println!("n_t_max : {:?}", n_t_max);
         }
 
 
@@ -950,7 +978,7 @@ fn f_animate_microlensing_theoretical(){
             //     n_tE_duration_event,//n_tE_duration_event: f64, 
             //     n_t_max as f64//n_t_max: f64, 
             // );
-            println!("n_y{:?}",n_y);
+            // println!("n_y{:?}",n_y);
             n_x+=1;
 
             f_write_color(
@@ -960,8 +988,8 @@ fn f_animate_microlensing_theoretical(){
                 n_pixel_channels,
                 //  o_mouse_state.coords.0.try_into().unwrap(),
                 //  o_mouse_state.coords.1.try_into().unwrap(),
-                (n_x as f64 + (n_screen_scale_x /2.0)) as u32,
-                (n_y + (n_screen_scale_y /2.0)) as u32,
+                (n_x as f64 + (n_scale_x /2.0)) as u32,
+                (n_y + (n_scale_x /2.0)) as u32,
                 3,
                 3,
                 &a_n_u8__color
