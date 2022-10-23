@@ -51,12 +51,12 @@ n_t_max_estimated {o_light_curve['n_t_max_estimated']}"""
         label="estimated"
     )
 
-    matplotlib.plot(
-        o_light_curve["hmjd"],
-        o_light_curve["mag"],
-        'bo', 
-        label="real data"
-    )
+    # matplotlib.plot(
+    #     o_light_curve["hmjd"],
+    #     o_light_curve["mag"],
+    #     'bo', 
+    #     label="real data"
+    # )
     
     matplotlib.legend()
 

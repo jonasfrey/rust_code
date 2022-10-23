@@ -154,74 +154,156 @@ fn f_n_find_curve(
                 n_mag_max = *n_mag;
             }
         }
+
+        let mut n_t_min = a_n_t[0];
+        let mut n_t_max = a_n_t[0];
         
+        for n_t in a_n_t.iter(){
+            if(*n_t < n_t_min){
+                n_t_min = *n_t;
+            }
+            if(*n_t > n_t_max){
+                n_t_max = *n_t;
+            }
+        }
+        
+
         println!("n_mag_min {:?}", n_mag_min);
         println!("n_mag_max {:?}", n_mag_max);
         let n_min_tE = 1;
-        let n_max_tE = (n_mag_max - n_mag_min) as u32;
+        let n_max_tE = (n_t_max - n_t_min) as u32;
 
         println!("n_min_tE: {:?}", n_min_tE);
         println!("n_max_tE: {:?}", n_max_tE);
 
-        for n_count in 1..100{
-            let n_umin = n_count as f32 * 0.01;
-            for n_tE in n_min_tE..n_max_tE{
-                for n_mag2 in 100*n_mag_min as i64 ..100*n_mag_max as i64{
-                    let n_mag2_f32 = n_mag2 as f32 * 0.01;
+        let mut b_inside_loop1 = false;
+        let mut b_inside_loop2 = false;
+        let mut b_inside_loop3 = false;
+        let mut b_inside_loop4 = false;
+
+        // let n_steps_n_umin = 100;
+        // for n_count in 1..n_steps_n_umin{
+        //     b_inside_loop1 = true;
+        //     let n_umin = n_count as f32 * (1.0/n_steps_n_umin as f32);
+        //     for n_tE in n_min_tE..n_max_tE{
+        //         b_inside_loop2 = true;
+        //         for n_mag2 in 100*n_mag_min as i64 ..100*n_mag_max as i64{
+        //             let n_mag2_f32 = n_mag2 as f32 * 0.01;
                     
-                    let n_min = (n_mag_min + (0.5*n_tE as f32))as u32; 
-                    let n_max = (n_mag_max - (0.5*n_tE as f32))as u32; 
-                    for n_t_max in n_min..n_max{
-                        // let a_n : Vec<f64> = Vec::new();
-                        let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
-                        let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
-                        let mut n_sum_difference_theo_data_mean = 0.0;
-                        for n_index_mag in 0..a_n_mag.len(){
-                            // d, umin, tE, I, t_max
-                            let n_mag = a_n_mag[n_index_mag]; 
-                            let n_t = a_n_t[n_index_mag];
-                            let n_microlensing_theoretical = f_n_microlensing_theoretical(
-                                n_t, 
-                                n_umin as f64, 
-                                n_tE as f64, 
-                                f32::powf(10.0, (n_mag2_f32 / -2.5)) as f64,
-                                n_t_max as f64
-                            );
-                            // println!("n_mag {:?}", n_mag);
-                            // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
-                            a_n_hours_modified_julian_date_estimated.push(n_t);
-                            a_n_magnitude_estimated.push(n_microlensing_theoretical);
-                            n_sum_difference_theo_data_mean+=(n_microlensing_theoretical - n_mag as f64).abs();
-                        }
+        //             let n_min = (n_min_tE as f32 + (0.5*n_tE as f32))as u32; 
+        //             let n_max = (n_max_tE as f32 - (0.5*n_tE as f32))as u32; 
+        //             for n_t_max in n_min..n_max{
+        //                 b_inside_loop3 = true;
+        //                 // let a_n : Vec<f64> = Vec::new();
+        //                 let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
+        //                 let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
+        //                 let mut n_sum_difference_theo_data_mean = 0.0;
+        //                 for n_index_mag in 0..a_n_mag.len(){
+        //                     b_inside_loop4 = true;
+        //                     // d, umin, tE, I, t_max
+        //                     let n_mag = a_n_mag[n_index_mag]; 
+        //                     let n_t = a_n_t[n_index_mag];
+        //                     let n_microlensing_theoretical = f_n_microlensing_theoretical(
+        //                         n_t, 
+        //                         n_umin as f64, 
+        //                         n_tE as f64, 
+        //                         f32::powf(10.0, (n_mag2_f32 / -2.5)) as f64,
+        //                         n_t_max as f64
+        //                     );
+        //                     // println!("n_mag {:?}", n_mag);
+        //                     // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
+        //                     a_n_hours_modified_julian_date_estimated.push(n_t);
+        //                     a_n_magnitude_estimated.push(n_microlensing_theoretical);
+        //                     n_sum_difference_theo_data_mean+=(n_microlensing_theoretical - n_mag as f64).abs();
+        //                 }
                         
-                        a_n_difference.push(n_sum_difference_theo_data_mean);
+        //                 a_n_difference.push(n_sum_difference_theo_data_mean);
 
-                        o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
-                        o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
-                        // println!("n_sum_difference_theo_data_mean :{:?}", n_sum_difference_theo_data_mean);
+        //                 o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
+        //                 o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
+        //                 // println!("n_sum_difference_theo_data_mean :{:?}", n_sum_difference_theo_data_mean);
 
-                        if(n_difference_min.is_some()){
-                            if(n_sum_difference_theo_data_mean < n_difference_min.unwrap()){
+        //                 if(n_difference_min.is_some()){
+        //                     if(n_sum_difference_theo_data_mean < n_difference_min.unwrap()){
 
-                                o_light_curve.n_umin_estimated = n_umin as f64;
-                                o_light_curve.n_t_max_estimated = n_t_max as f64;
-                                n_difference_min = Some(n_sum_difference_theo_data_mean);
-                            }
-                        }else{
-                            o_light_curve.n_umin_estimated = n_umin as f64;
-                            o_light_curve.n_t_max_estimated = n_t_max as f64;
-                            n_difference_min = Some(n_sum_difference_theo_data_mean);
-                        }
+        //                         o_light_curve.n_umin_estimated = n_umin as f64;
+        //                         o_light_curve.n_t_max_estimated = n_t_max as f64;
+        //                         n_difference_min = Some(n_sum_difference_theo_data_mean);
+        //                     }
+        //                 }else{
+        //                     o_light_curve.n_umin_estimated = n_umin as f64;
+        //                     o_light_curve.n_t_max_estimated = n_t_max as f64;
+        //                     n_difference_min = Some(n_sum_difference_theo_data_mean);
+        //                 }
 
-                        // let n_difference_theo_data_mean = 
-                    }
+        //                 // let n_difference_theo_data_mean = 
+        //             }
+        //         }
+                
+        //     }
+
+        // }
+
+
+        let n_steps_umin = 10; 
+        let n_normalizing_factor_steps_umin = (n_steps_umin as f32) / 1.0;
+        for n_step_umin in 1..n_steps_umin{
+            let n_umin_normalized = n_step_umin as f32 * n_normalizing_factor_steps_umin; // 0.01, 0.02, 0.03 ...
+            
+            let n_steps_te = 10; 
+            let n_normalizing_factor_steps_te = (n_steps_te as f32) / 1.0;
+            for n_step_te in 1..n_steps_te{
+                let n_te_normalized = n_step_te as f32 * n_normalizing_factor_steps_te; // 0.01, 0.02, 0.03 ...
+                
+                let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
+                let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
+                let mut n_sum_difference_theo_data_mean = 0.0;
+                for n_index_mag in 0..a_n_mag.len(){
+                    b_inside_loop4 = true;
+                    // d, umin, tE, I, t_max
+                    let n_mag = a_n_mag[n_index_mag]; 
+                    let n_t = a_n_t[n_index_mag];
+                    let n_microlensing_theoretical = f_n_microlensing_theoretical(
+                        n_t, 
+                        n_umin_normalized as f64,
+                        n_te_normalized as f64, 
+                        f32::powf(10.0, (n_mag_min / -2.5)) as f64,
+                        n_t_max - ((n_t_max - n_t_min)/2.0) as f64
+                    ) * n_mag_max as f64 + n_mag_min as f64;
+                    // println!("n_mag {:?}", n_mag);
+                    // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
+                    a_n_hours_modified_julian_date_estimated.push(n_t);
+                    a_n_magnitude_estimated.push(n_microlensing_theoretical);
+                    n_sum_difference_theo_data_mean+=(n_microlensing_theoretical - n_mag as f64).abs();
                 }
                 
+                a_n_difference.push(n_sum_difference_theo_data_mean);
+
+                o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
+                o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
+                // println!("n_sum_difference_theo_data_mean :{:?}", n_sum_difference_theo_data_mean);
+
+                if(n_difference_min.is_some()){
+                    if(n_sum_difference_theo_data_mean < n_difference_min.unwrap()){
+                        n_difference_min = Some(n_sum_difference_theo_data_mean);
+                    }
+                }else{
+
+                    n_difference_min = Some(n_sum_difference_theo_data_mean);
+                }
+    
             }
 
         }
 
 
+        if(n_difference_min.is_none()){
+            println!("b_inside_loop1: {:?}", b_inside_loop1);
+            println!("b_inside_loop2: {:?}", b_inside_loop2);
+            println!("b_inside_loop3: {:?}", b_inside_loop3);
+            println!("b_inside_loop4: {:?}", b_inside_loop4);
+    
+        }
     }
 
     println!("n_difference_min: {:?}", n_difference_min);
