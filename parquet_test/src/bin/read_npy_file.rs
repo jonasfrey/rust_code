@@ -129,6 +129,106 @@ fn f_print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
 }
 
+
+
+fn f_n_find_curve(
+    o_light_curve: &mut O_light_curve
+) -> f64 {
+
+    let mut a_n_difference : Vec<f64> = Vec::new();
+    let a_n_t = &o_light_curve.hmjd; // a_x_t
+    let a_n_mag = &o_light_curve.mag; // a_y_mag
+
+    let mut n_difference_min: Option<f64> = None;
+    // println!("a_n_mag.len(): {:?}", a_n_mag.len());
+    if(a_n_mag.len() > 0){
+                    
+        let mut n_mag_min = a_n_mag[0];
+        let mut n_mag_max = a_n_mag[0];
+
+        for n_mag in a_n_mag.iter(){
+            if(*n_mag < n_mag_min){
+                n_mag_min = *n_mag;
+            }
+            if(*n_mag > n_mag_max){
+                n_mag_max = *n_mag;
+            }
+        }
+        
+        println!("n_mag_min {:?}", n_mag_min);
+        println!("n_mag_max {:?}", n_mag_max);
+        let n_min_tE = 1;
+        let n_max_tE = (n_mag_max - n_mag_min) as u32;
+
+        println!("n_min_tE: {:?}", n_min_tE);
+        println!("n_max_tE: {:?}", n_max_tE);
+
+        for n_count in 1..100{
+            let n_umin = n_count as f32 * 0.01;
+            for n_tE in n_min_tE..n_max_tE{
+                for n_mag2 in 100*n_mag_min as i64 ..100*n_mag_max as i64{
+                    let n_mag2_f32 = n_mag2 as f32 * 0.01;
+                    
+                    let n_min = (n_mag_min + (0.5*n_tE as f32))as u32; 
+                    let n_max = (n_mag_max - (0.5*n_tE as f32))as u32; 
+                    for n_t_max in n_min..n_max{
+                        // let a_n : Vec<f64> = Vec::new();
+                        let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
+                        let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
+                        let mut n_sum_difference_theo_data_mean = 0.0;
+                        for n_index_mag in 0..a_n_mag.len(){
+                            // d, umin, tE, I, t_max
+                            let n_mag = a_n_mag[n_index_mag]; 
+                            let n_t = a_n_t[n_index_mag];
+                            let n_microlensing_theoretical = f_n_microlensing_theoretical(
+                                n_t, 
+                                n_umin as f64, 
+                                n_tE as f64, 
+                                f32::powf(10.0, (n_mag2_f32 / -2.5)) as f64,
+                                n_t_max as f64
+                            );
+                            // println!("n_mag {:?}", n_mag);
+                            // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
+                            a_n_hours_modified_julian_date_estimated.push(n_t);
+                            a_n_magnitude_estimated.push(n_microlensing_theoretical);
+                            n_sum_difference_theo_data_mean+=(n_microlensing_theoretical - n_mag as f64).abs();
+                        }
+                        
+                        a_n_difference.push(n_sum_difference_theo_data_mean);
+
+                        o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
+                        o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
+                        // println!("n_sum_difference_theo_data_mean :{:?}", n_sum_difference_theo_data_mean);
+
+                        if(n_difference_min.is_some()){
+                            if(n_sum_difference_theo_data_mean < n_difference_min.unwrap()){
+
+                                o_light_curve.n_umin_estimated = n_umin as f64;
+                                o_light_curve.n_t_max_estimated = n_t_max as f64;
+                                n_difference_min = Some(n_sum_difference_theo_data_mean);
+                            }
+                        }else{
+                            o_light_curve.n_umin_estimated = n_umin as f64;
+                            o_light_curve.n_t_max_estimated = n_t_max as f64;
+                            n_difference_min = Some(n_sum_difference_theo_data_mean);
+                        }
+
+                        // let n_difference_theo_data_mean = 
+                    }
+                }
+                
+            }
+
+        }
+
+
+    }
+
+    println!("n_difference_min: {:?}", n_difference_min);
+    return 0.0;
+    // return n_difference_min.unwrap();
+    
+}
 fn f_exmaple_read_single_file(
     s_path_file: &String
 ){
@@ -207,9 +307,6 @@ fn f_exmaple_read_single_file(
                 f_match_and_assign_a_to_o_light_curve!(catflags, s_name, o_light_curve, value, Int, i32);
 
                 // println!("o_light_curve.objectid {:?}", o_light_curve.objectid);
-                let mut a_n_difference : Vec<f64> = Vec::new();
-                let a_n_t = &o_light_curve.hmjd; // a_x_t
-                let a_n_mag = &o_light_curve.mag; // a_y_mag
 
                 
 
@@ -219,108 +316,10 @@ fn f_exmaple_read_single_file(
                 //     Some(min) => println!( "Min value: {}", min ),
                 //     None      => println!( "Vector is empty" ),
                 // }
-                if(a_n_mag.len() > 0){
-                    
-                    let mut n_mag_min = a_n_mag[0];
-                    let mut n_mag_max = a_n_mag[0];
+                let n_difference_min = f_n_find_curve(
+                    &mut o_light_curve
+                );
 
-                    for n_mag in a_n_mag.iter(){
-                        if(*n_mag < n_mag_min){
-                            n_mag_min = *n_mag;
-                        }
-                        if(*n_mag > n_mag_max){
-                            n_mag_max = *n_mag;
-                        }
-                    }
-                    
-                    // println!("n_mag_min {:?}", n_mag_min);
-                    // println!("n_mag_max {:?}", n_mag_max);
-                    let n_min_tE = 1;
-                    let n_max_tE = (n_mag_max - n_mag_min) as u32;
-
-
-                    for n_count in 1..100{
-                        let n_umin = n_count as f32 * 0.01;
-                        for n_tE in n_min_tE..n_max_tE{
-                            for n_mag2 in 100*n_mag_min as i64 ..100*n_mag_max as i64{
-                                let n_mag2_f32 = n_mag2 as f32 * 0.01;
-                                
-                                let n_min = (n_mag_min + (0.5*n_tE as f32))as u32; 
-                                let n_max = (n_mag_max - (0.5*n_tE as f32))as u32; 
-                                for n_t_max in n_min..n_max{
-                                    // let a_n : Vec<f64> = Vec::new();
-                                    let mut a_n_hours_modified_julian_date_estimated : Vec<f64>  = Vec::new();
-                                    let mut a_n_magnitude_estimated : Vec<f64>  = Vec::new();
-                                    let mut n_sum_difference_theo_data_mean = 0.0;
-                                    for n_index_mag in 0..a_n_mag.len(){
-                                        // d, umin, tE, I, t_max
-                                        let n_mag = a_n_mag[n_index_mag]; 
-                                        let n_t = a_n_t[n_index_mag];
-                                        let n_microlensing_theoretical = f_n_microlensing_theoretical(
-                                            n_t, 
-                                            n_umin as f64, 
-                                            n_tE as f64, 
-                                            f32::powf(10.0, (n_mag2_f32 / -2.5)) as f64,
-                                            n_t_max as f64
-                                        );
-                                        // println!("n_mag {:?}", n_mag);
-                                        // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
-                                        a_n_hours_modified_julian_date_estimated.push(n_t);
-                                        a_n_magnitude_estimated.push(n_microlensing_theoretical);
-                                        n_sum_difference_theo_data_mean+=(n_microlensing_theoretical - n_mag as f64).abs();
-                                    }
-                                    
-                                    a_n_difference.push(n_sum_difference_theo_data_mean);
-    
-                                    o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
-                                    o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
-                                    if(n_sum_difference_theo_data_mean < n_difference_min){
-                                        o_light_curve.n_umin_estimated = n_umin as f64;
-                                        o_light_curve.n_t_max_estimated = n_t_max as f64;
-                                        n_difference_min = n_sum_difference_theo_data_mean;
-                                    }
-                                    // let n_difference_theo_data_mean = 
-                                }
-                            }
-                            
-                        }
-                    }
-
-                    // min_mag = min(a_y_mag)
-                    // max_mag = max(a_y_mag)
-                
-                    // min_tE = 1
-                    // max_tE = int(max_mag) - int(min_mag)
-
-                    // for umin in [0.01*x for x in range(1, 100)]:
-                    // for tE in range(min_tE, max_tE):
-                    //     # for I-calculation, gets converted later
-                    //     for mag in [0.01*x for x in range(int(100*min_mag), int(100*max_mag))]:
-                    //         for t_max in range(int(min_mag + 0.5*tE), int(max_mag - 0.5*tE)):
-                    //             difference_theo_data_mean = np.sum(
-                    //                 [
-                    //                     np.absolute(
-                    //                         f_theo(
-                    //                             a_x_t,
-                    //                             umin,
-                    //                             tE,
-                    //                             10**(mag/-2.5),
-                    //                             t_max
-                    //                         )[x] - a_y_mag[x]
-                    //                     )
-                    //                     for x
-                    //                     in range(len(a_y_mag))
-                    //                 ]
-                    //             )  # needs I as input but data in mag - conversion here
-                    //             # get rid of -/+-differences to take min difference afterwards -> makes list of theo-mag-values for every value and then calculates mean
-                    //             # save in list and then calculate minimum
-                    //             a_differences.append(difference_theo_data_mean)
-
-                                
-                    // std::process::exit(1);
-
-                    // println!("column index: {}, column name: {}, column value: {}", idx, name, field);
-                }
 
 
 
@@ -481,6 +480,9 @@ fn main() {
         }
         if(a_s_arg[1] == String::from("f_animate_microlensing_theoretical")){
             f_animate_microlensing_theoretical();
+        }
+        if(a_s_arg[1] == String::from("f_test_manual")){
+            f_test_manual();
         }
     }
     println!("a_s_arg {:?}", a_s_arg);
@@ -803,6 +805,71 @@ fn f_write_color(
     // return a_vec
 }
 
+fn f_test_manual(){
+    let o_file = fs::File::open("./artificial_test_data.json")
+    .expect("file should open read only");
+    let o_json: serde_json::Value = serde_json::from_reader(o_file)
+        .expect("file should be proper JSON");
+    let a_o = o_json.as_array().unwrap();
+    let mut a_o_light_curve__artificial_test_data : Vec<O_light_curve> = Vec::new();
+    for o in a_o{
+        
+        let mut o_light_curve = O_light_curve {
+            objectid: 0,
+            filterid: 0,
+            fieldid: 0,
+            rcid: 0, 
+            objra: 0.0, 
+            objdec: 0.0, 
+            nepochs: 0, 
+            hmjd: Vec::new(),
+            a_n_hours_modified_julian_date_estimated: Vec::new(),
+            mag: Vec::new(), 
+            a_n_magnitude_estimated: Vec::new(), 
+            magerr: Vec::new(), 
+            clrcoeff: Vec::new(), 
+            catflags: Vec::new(),
+            n_umin_estimated: 0.0,
+            n_tE_estimated: 0.0,
+            n_I_estimated: 0.0,
+            n_t_max_estimated: 0.0,
+        };
+    
+        // let a_n_t = &o_light_curve.hmjd; // a_x_t
+        // let a_n_mag = &o_light_curve.mag; // a_y_mag
+        for n_time in o["a_n_time"].as_array().unwrap().iter(){
+            o_light_curve.hmjd.push(
+                n_time.as_i64().unwrap() as f64
+            )
+        }
+        for n_magnitude in o["a_n_magnitude"].as_array().unwrap().iter(){
+            o_light_curve.mag.push(
+                n_magnitude.as_f64().unwrap() as f32
+            )
+        }
+
+        let n_difference_min = f_n_find_curve(
+            &mut o_light_curve
+        );
+
+        a_o_light_curve__artificial_test_data.push(
+            o_light_curve
+        );
+
+        // println!("o {:?}", o);
+    }
+
+    let json = serde_json::to_string(&a_o_light_curve__artificial_test_data).unwrap();
+    // let mut file = File::create("test.json").unwrap();
+    // file.write_all(&json).unwrap();
+
+
+    std::fs::write(
+        "./a_o_light_curve__artificial_test_data.json",
+        serde_json::to_string(&a_o_light_curve__artificial_test_data).unwrap()
+    ).unwrap();
+
+}
 
 fn f_o_text_to_png_text_png(
     s_text: &String, 

@@ -2,9 +2,13 @@ import json
 from webbrowser import BackgroundBrowser
 import matplotlib.pyplot as matplotlib
 import subprocess
+import sys
 
+if(len(sys.argv)>1):
+    s_path_file = sys.argv[1]
+else: 
+    s_path_file = "./optimal_difference.json"
 
-s_path_file = "./optimal_difference.json"
 o_file = open(s_path_file)
 
 
@@ -59,7 +63,9 @@ n_t_max_estimated {o_light_curve['n_t_max_estimated']}"""
     # matplotlib.show()
     # exit(1)
     # matplotlib.savefig(f"n_objectid_{o_light_curve['objectid']}_{n_i}.png")
-    matplotlib.savefig(f"{n_i}.png")
+    s_picture_prefix = s_path_file.split("/")[-1].split(".")[0]
+    s_picture_prefix_full = f"{s_picture_prefix}_plotted_"
+    matplotlib.savefig(f"{s_picture_prefix_full}{n_i}.png")
     matplotlib.clf()
     matplotlib.close()
 
@@ -73,7 +79,7 @@ a_s_argument = [
         # "-pattern_type"
         # "glob",
         "-i", 
-        "%d.png", 
+        f"{s_picture_prefix_full}%d.png",
         "-c:v", 
         "libx264", 
         "-profile:v",
@@ -84,7 +90,7 @@ a_s_argument = [
         "yuv420p",
         "-r", 
         "30", 
-        "plot_optimal_difference_output.mp4"
+        f"{s_picture_prefix_full}.mp4"
     ]
 s_command = " ".join(a_s_argument)
 print(f"running command:{s_command}")
