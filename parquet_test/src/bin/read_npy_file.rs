@@ -253,21 +253,27 @@ fn f_exmaple_read_single_file(
                                     // d, umin, tE, I, t_max
                                     let n_mag = a_n_mag[n_index_mag]; 
                                     let n_t = a_n_t[n_index_mag];
-                                    let n_theo = f_microlensing_theoretical(
+                                    let n_microlensing_theoretical = f_n_microlensing_theoretical(
                                         n_t, 
                                         n_umin as f64, 
                                         n_tE as f64, 
                                         f32::powf(10.0, (n_mag as f32 / -2.5)) as f64,
                                         n_t_max as f64
                                     );
+                                    // println!("n_mag {:?}", n_mag);
+                                    // println!("n_microlensing_theoretical {:?}", n_microlensing_theoretical as f32);
                                     a_n_hours_modified_julian_date_estimated.push(n_t);
-                                    a_n_magnitude_estimated.push(n_theo);
-                                    n_sum_difference_theo_data_mean+=n_theo.abs() - n_mag as f64;
+                                    a_n_magnitude_estimated.push(n_microlensing_theoretical);
+                                    n_sum_difference_theo_data_mean+=n_microlensing_theoretical.abs() - n_mag as f64;
                                 }
+                                
                                 a_n_difference.push(n_sum_difference_theo_data_mean);
+
+                                o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
+                                o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
                                 if(n_sum_difference_theo_data_mean < n_difference_min){
-                                    o_light_curve.a_n_magnitude_estimated = a_n_magnitude_estimated;
-                                    o_light_curve.a_n_hours_modified_julian_date_estimated = a_n_hours_modified_julian_date_estimated;
+                                    o_light_curve.n_umin_estimated = n_umin as f64;
+                                    o_light_curve.n_t_max_estimated = n_t_max as f64;
                                     n_difference_min = n_sum_difference_theo_data_mean;
                                 }
                                 // let n_difference_theo_data_mean = 
@@ -319,6 +325,9 @@ fn f_exmaple_read_single_file(
                 println!("n_difference_min {:?}",n_difference_min);
                 a_o_light_curve__optimal_difference.push(o_light_curve);
             }
+            // else{
+            //     a_o_light_curve__optimal_difference.push(o_light_curve);
+            // }
 
             n_index+=1;
         }
@@ -454,7 +463,19 @@ fn main() {
     // f_animate_microlensing_theoretical();
 }
 
-fn f_microlensing_theoretical(
+// def ML_theo(d, umin, tE, I, t_max): #theoretische ML-Funktion, input = time-array, output = mag-array
+//     #umin => between 0 and 1 - the smaller, the bigger the amplitude
+//     #tE => duration of Event - the bigger, the wider the curve
+//     #I => intensity I = (light intensity)/Area of star without amplification
+//     #t_max => time when amplification A of I reaches maximum a
+//     u = np.sqrt(umin**2 + ((d-t_max)/tE)**2)
+//     if u*np.sqrt(u**2 + 4) != 0:
+//         A = I*((u**2 + 2) / (u*np.sqrt(u**2 + 4))) 
+//         M = -2.5*np.log10(A) # conversion to magnitude
+//     else: M = -10 #if umin = 0 and d = t0, amplitude theoretically becomes infinite 
+//     return M 
+
+fn f_n_microlensing_theoretical(
     n_d: f64,
     n_umin: f64,
     n_tE: f64,
@@ -462,13 +483,15 @@ fn f_microlensing_theoretical(
     n_t_max: f64,
 )->f64{
     let n_static = -2.5;
-    let n_u = ((n_umin as i64).pow(2) as f64 + (((((n_d-n_t_max)/n_tE) as i64).pow(2)) as f64).sqrt());
-    let mut n_M = -10.0;
-    if (n_u*(((n_u as i64).pow(2) + 4) as f64).sqrt() != 0.0){
-        let n_A = n_I*((((n_u as i64).pow(2) + 2) as f64) / (n_u*(((n_u as i64).pow(2) + 4) as f64).sqrt())); 
-        n_M = n_static*(n_A).log10(); //# conversion to magnitude
+    let n_u = (f64::powf(n_umin,2.0) + (f64::powf((n_d-n_t_max)/n_tE, 2.0))).sqrt();
+    let n_u2 = n_u*(f64::powf(n_u,2.0) + 4.0).sqrt();
+    if(n_u2 != 0.0){
+        let n_A = n_I*((f64::powf(n_u, 2.0)+ 2.0) / n_u2);
+        let n_M = n_static * n_A.log10();
+        return n_M
+    }else{
+        return -10.0
     }
-    return n_M
 }
 
 fn f_u32__color_rgba_mixed(
@@ -782,9 +805,9 @@ fn f_o_text_to_png_text_png(
 
 fn f_animate_microlensing_theoretical(){
 
-    let n_scale_x = 1920.0;
+    let n_scale_x = 512.0;
     // let n_scale_x = 100.0;
-    let n_scale_y = 1080.0;
+    let n_scale_y = 512.0;
     // let n_scale_y = 100.0;
     let n_pixel_channels = 4;
 
@@ -913,7 +936,7 @@ fn f_animate_microlensing_theoretical(){
             // println!("n_tE_duration_event {:?}",n_tE_duration_event);
             
             // f_theo(o,1,5,1,200,1)*500
-            let n_y = f_microlensing_theoretical(
+            let n_y = f_n_microlensing_theoretical(
                 n_x as f64, 
                 n_umin,
                 n_tE,
