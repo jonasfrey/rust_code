@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)https://rcoh.me/posts/rust-linked-list-basically-impossible/ -->
+<html lang="en-us"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title> Why Writing a Linked List in (safe) Rust is So Damned Hard</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.32.2">
+    
+    
+      <meta name="ROBOTS" content="INDEX, FOLLOW">
+    
+
+    <link href="./Why Writing a Linked List in (safe) Rust is So Damned Hard_files/main.css" rel="stylesheet" type="text/css">
+    <link href="./Why Writing a Linked List in (safe) Rust is So Damned Hard_files/custom.css" rel="stylesheet" type="text/css">
+    
+      
+    
+
+    
+
+    <meta property="og:title" content="Why Writing a Linked List in (safe) Rust is So Damned Hard">
+<meta property="og:description" content="Before I start this post, let me preface it by saying that I’m not an experienced Rustacean by any means. The excellent foks at /r/rust gave a lot of helpful feedback and cleared up some misconceptions I had. Futher errata and corrections are appreciated. This post is aimed at helping other fledgling rust-learners avoid my mistake. First, by helping Rust learners pick good introductory projects that will fit naturally in idiomatic rust.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rcoh.me/posts/rust-linked-list-basically-impossible/">
+
+
+
+<meta property="article:published_time" content="2018-02-20T08:55:56-08:00">
+
+<meta property="article:modified_time" content="2018-02-20T08:55:56-08:00">
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="Why Writing a Linked List in (safe) Rust is So Damned Hard">
+<meta itemprop="description" content="Before I start this post, let me preface it by saying that I’m not an experienced Rustacean by any means. The excellent foks at /r/rust gave a lot of helpful feedback and cleared up some misconceptions I had. Futher errata and corrections are appreciated. This post is aimed at helping other fledgling rust-learners avoid my mistake. First, by helping Rust learners pick good introductory projects that will fit naturally in idiomatic rust.">
+
+
+<meta itemprop="datePublished" content="2018-02-20T08:55:56-08:00">
+<meta itemprop="dateModified" content="2018-02-20T08:55:56-08:00">
+<meta itemprop="wordCount" content="1344">
+
+
+
+<meta itemprop="keywords" content="rust,algorithms,">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Why Writing a Linked List in (safe) Rust is So Damned Hard">
+<meta name="twitter:description" content="Before I start this post, let me preface it by saying that I’m not an experienced Rustacean by any means. The excellent foks at /r/rust gave a lot of helpful feedback and cleared up some misconceptions I had. Futher errata and corrections are appreciated. This post is aimed at helping other fledgling rust-learners avoid my mistake. First, by helping Rust learners pick good introductory projects that will fit naturally in idiomatic rust.">
+
+      
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-111671237-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async="" src="./Why Writing a Linked List in (safe) Rust is So Damned Hard_files/analytics.js"></script>
+
+      <script>
+        
+
+        var trackOutboundLink = function(url) {
+           ga('send', 'event', 'outbound', 'click', url, {
+             'transport': 'beacon',
+           });
+        }
+
+        var trackSubscribe = function() {
+          ga('send', 'event', 'engage', 'subscribe', 'todo', {
+            'transport': 'beacon',
+          });
+        }
+      </script>
+    
+  <style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 5px 0px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; -khtml-border-radius: 5px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 1px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: .7em}
+.MathJax_MenuRadioCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuLabel {padding: 1px 2em 3px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #DDDDDD; margin: 4px 3px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: #606872; color: white}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><style type="text/css">.MathJax_Display {text-align: center; margin: 1em 0em; position: relative; display: block!important; text-indent: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; width: 100%}
+.MathJax .merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MathJax .MJX-monospace {font-family: monospace}
+.MathJax .MJX-sans-serif {font-family: sans-serif}
+#MathJax_Tooltip {background-color: InfoBackground; color: InfoText; border: 1px solid black; box-shadow: 2px 2px 5px #AAAAAA; -webkit-box-shadow: 2px 2px 5px #AAAAAA; -moz-box-shadow: 2px 2px 5px #AAAAAA; -khtml-box-shadow: 2px 2px 5px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true'); padding: 3px 4px; z-index: 401; position: absolute; left: 0; top: 0; width: auto; height: auto; display: none}
+.MathJax {display: inline; font-style: normal; font-weight: normal; line-height: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-align: left; text-transform: none; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; padding: 0; margin: 0}
+.MathJax:focus, body :focus .MathJax {display: inline-table}
+.MathJax.MathJax_FullWidth {text-align: center; display: table-cell!important; width: 10000em!important}
+.MathJax img, .MathJax nobr, .MathJax a {border: 0; padding: 0; margin: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; vertical-align: 0; line-height: normal; text-decoration: none}
+img.MathJax_strut {border: 0!important; padding: 0!important; margin: 0!important; vertical-align: 0!important}
+.MathJax span {display: inline; position: static; border: 0; padding: 0; margin: 0; vertical-align: 0; line-height: normal; text-decoration: none}
+.MathJax nobr {white-space: nowrap!important}
+.MathJax img {display: inline!important; float: none!important}
+.MathJax * {transition: none; -webkit-transition: none; -moz-transition: none; -ms-transition: none; -o-transition: none}
+.MathJax_Processing {visibility: hidden; position: fixed; width: 0; height: 0; overflow: hidden}
+.MathJax_Processed {display: none!important}
+.MathJax_ExBox {display: block!important; overflow: hidden; width: 1px; height: 60ex; min-height: 0; max-height: none}
+.MathJax .MathJax_EmBox {display: block!important; overflow: hidden; width: 1px; height: 60em; min-height: 0; max-height: none}
+.MathJax_LineBox {display: table!important}
+.MathJax_LineBox span {display: table-cell!important; width: 10000em!important; min-width: 0; max-width: none; padding: 0; border: 0; margin: 0}
+.MathJax .MathJax_HitBox {cursor: text; background: white; opacity: 0; filter: alpha(opacity=0)}
+.MathJax .MathJax_HitBox * {filter: none; opacity: 1; background: transparent}
+#MathJax_Tooltip * {filter: none; opacity: 1; background: transparent}
+@font-face {font-family: MathJax_Main; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Main-Regular.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Main-Regular.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Main-bold; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Main-Bold.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Main-Bold.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Main-italic; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Main-Italic.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Main-Italic.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Math-italic; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Math-Italic.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Math-Italic.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Caligraphic; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Regular.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Caligraphic-Regular.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Size1; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Size1-Regular.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Size1-Regular.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Size2; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Size2-Regular.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Size2-Regular.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Size3; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Size3-Regular.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Size3-Regular.otf?V=2.7.1') format('opentype')}
+@font-face {font-family: MathJax_Size4; src: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff?V=2.7.1') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/fonts/HTML-CSS/TeX/otf/MathJax_Size4-Regular.otf?V=2.7.1') format('opentype')}
+.MathJax .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+
+  <body class="ma0 avenir bg-near-white production"><div style="visibility: hidden; overflow: hidden; position: absolute; top: 0px; height: 1px; width: auto; padding: 0px; border: 0px; margin: 0px; text-align: left; text-indent: 0px; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal;"><div id="MathJax_Hidden"></div></div><div id="MathJax_Message" style="display: none;"></div>
+
+    
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="https://rcoh.me/" class="f3 fw2 hover-white no-underline white-90 dib">
+      Russell Cohen
+    </a>
+    <div class="flex-l items-center">
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://rcoh.me/posts/" title="Posts page">
+              Posts
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="https://rcoh.me/projects/" title="Projects page">
+              Projects
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+  <a href="https://twitter.com/russellrcohen" class="link-transition twitter link dib z-999   mr2" title="Twitter link" onclick="trackOutboundLink(&#39;twitter-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"></path></svg>
+
+  </a>
+
+
+  <a href="https://www.instagram.com/therealrussbuss/" class="link-transition instagram link dib z-999   mr2" title="Instagram link" onclick="trackOutboundLink(&#39;insta-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M42.271,26.578v-0.006c0.502,0,1.005,0.01,1.508-0.002  c0.646-0.017,1.172-0.57,1.172-1.217c0-0.963,0-1.927,0-2.89c0-0.691-0.547-1.24-1.236-1.241c-0.961,0-1.922-0.001-2.883,0  c-0.688,0.001-1.236,0.552-1.236,1.243c-0.001,0.955-0.004,1.91,0.003,2.865c0.001,0.143,0.028,0.291,0.073,0.426  c0.173,0.508,0.639,0.82,1.209,0.823C41.344,26.579,41.808,26.578,42.271,26.578z M33,27.817c-3.384-0.002-6.135,2.721-6.182,6.089  c-0.049,3.46,2.72,6.201,6.04,6.272c3.454,0.074,6.248-2.686,6.321-6.043C39.254,30.675,36.462,27.815,33,27.817z M21.046,31.116  v0.082c0,4.515-0.001,9.03,0,13.545c0,0.649,0.562,1.208,1.212,1.208c7.16,0.001,14.319,0.001,21.479,0  c0.656,0,1.215-0.557,1.215-1.212c0.001-4.509,0-9.02,0-13.528v-0.094h-2.912c0.411,1.313,0.537,2.651,0.376,4.014  c-0.161,1.363-0.601,2.631-1.316,3.803s-1.644,2.145-2.779,2.918c-2.944,2.006-6.821,2.182-9.946,0.428  c-1.579-0.885-2.819-2.12-3.685-3.713c-1.289-2.373-1.495-4.865-0.739-7.451C22.983,31.116,22.021,31.116,21.046,31.116z   M45.205,49.255c0.159-0.026,0.318-0.049,0.475-0.083c1.246-0.265,2.264-1.304,2.508-2.557c0.025-0.137,0.045-0.273,0.067-0.409  V21.794c-0.021-0.133-0.04-0.268-0.065-0.401c-0.268-1.367-1.396-2.428-2.78-2.618c-0.058-0.007-0.113-0.02-0.17-0.03H20.761  c-0.147,0.027-0.296,0.047-0.441,0.08c-1.352,0.308-2.352,1.396-2.545,2.766c-0.008,0.057-0.02,0.114-0.029,0.171V46.24  c0.028,0.154,0.05,0.311,0.085,0.465c0.299,1.322,1.427,2.347,2.77,2.52c0.064,0.008,0.13,0.021,0.195,0.03H45.205z M33,64  C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"></path></svg>
+
+  </a>
+
+
+
+  <a href="https://www.linkedin.com/in/russell-cohen-b75b9927" class="link-transition linkedin link dib z-999   mr2" title="LinkedIn link" onclick="trackOutboundLink(&#39;linkedin-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"></path>
+</svg>
+
+  </a>
+
+
+  <a href="https://github.com/rcoh" class="link-transition github link dib z-999   mr2" title="Github link" onclick="trackOutboundLink(&#39;github-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M256,32C132.3,32,32,134.8,32,261.7c0,101.5,64.2,187.5,153.2,217.9c11.2,2.1,15.3-5,15.3-11.1   c0-5.5-0.2-19.9-0.3-39.1c-62.3,13.9-75.5-30.8-75.5-30.8c-10.2-26.5-24.9-33.6-24.9-33.6c-20.3-14.3,1.5-14,1.5-14   c22.5,1.6,34.3,23.7,34.3,23.7c20,35.1,52.4,25,65.2,19.1c2-14.8,7.8-25,14.2-30.7c-49.7-5.8-102-25.5-102-113.5   c0-25.1,8.7-45.6,23-61.6c-2.3-5.8-10-29.2,2.2-60.8c0,0,18.8-6.2,61.6,23.5c17.9-5.1,37-7.6,56.1-7.7c19,0.1,38.2,2.6,56.1,7.7   c42.8-29.7,61.5-23.5,61.5-23.5c12.2,31.6,4.5,55,2.2,60.8c14.3,16.1,23,36.6,23,61.6c0,88.2-52.4,107.6-102.3,113.3   c8,7.1,15.2,21.1,15.2,42.5c0,30.7-0.3,55.5-0.3,63c0,6.1,4,13.3,15.4,11C415.9,449.1,480,363.1,480,261.7   C480,134.8,379.7,32,256,32z"></path>
+</svg>
+
+  </a>
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+    <main class="pb7" role="main">
+      
+  <div class="flex-l mt2 blog-content center">
+    <article class="center cf pv5 ph3 ph4-ns mw8">
+      <header>
+        <p class="f6 b helvetica tracked">
+          POSTS
+        </p>
+        <time class="f6 mv4 dib tracked" datetime="2018-02-20T08:55:56-08:00">
+          February 20, 2018
+        </time>
+        <h1 class="f1">
+          Why Writing a Linked List in (safe) Rust is So Damned Hard
+        </h1>
+      </header>
+      <div class="nested-copy-line-height lh-copy  blog-font  nested-links centered-img mid-gray">
+        
+        
+
+<p>Before I start this post, let me preface it by saying that I’m not an experienced Rustacean by any means. The excellent foks at <a href="https://www.reddit.com/r/rust/">/r/rust</a> gave a lot of helpful feedback and cleared up some misconceptions I had. Futher errata and corrections are appreciated. This post is aimed at helping other fledgling rust-learners avoid my mistake. First, by helping Rust learners pick good introductory projects that will fit naturally in idiomatic rust. Second, by helping Rust learners start building Rust-friendly design intuition.</p>
+
+<p>I’d heard about Rust and its inscrutable borrow checker for years, but after reading a few blog posts about compiler error improvements, I figured it might be user-friendly enough to give it a try. I read a few chapters of the <a href="https://doc.rust-lang.org/book/second-edition/">book</a> and then set about my first project: I wanted to build an <a href="https://en.wikipedia.org/wiki/X-fast_trie">x-fast trie</a>. Specifically, I was curious about its performance in practice (hence the choice of a low-level language). I’ll save the details of what is a really cool data structure for a later post, and cut to the chase: an x-fast trie is a trie with values at the leaves. To enable <code class=" has-jax"><span class="MathJax_Preview" style="color: inherit; display: none;"></span><span class="MathJax" id="MathJax-Element-1-Frame" tabindex="0" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mi&gt;O&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;/math&gt;" role="presentation" style="position: relative;"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-1" style="width: 2.691em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.041em; height: 0px; font-size: 131%;"><span style="position: absolute; clip: rect(1.303em, 1001.95em, 2.561em, -999.998em); top: -2.166em; left: 0em;"><span class="mrow" id="MathJax-Span-2"><span class="mi" id="MathJax-Span-3" style="font-family: MathJax_Math-italic;">O</span><span class="mo" id="MathJax-Span-4" style="font-family: MathJax_Main;">(</span><span class="mn" id="MathJax-Span-5" style="font-family: MathJax_Main;">1</span><span class="mo" id="MathJax-Span-6" style="font-family: MathJax_Main;">)</span></span><span style="display: inline-block; width: 0px; height: 2.171em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.395em; border-left: 0px solid; width: 0px; height: 1.423em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></math></span></span><script type="math/tex" id="MathJax-Element-1">O(1)</script></code> predecessor and successor searches once you have a leaf node, <strong>the values are stored in a doubly linked list</strong>. Here, you will probably wonder why I didn’t use the LinkedList from the standard library. Crucially, it doesn’t allow inserting into the middle (which is the reason one needs a linked list in this case).</p>
+
+<p>I was coding along fairly successfully with a few small hiccups until I hit the doubly linked list. But when I started implementing it, the compiler let me know, in no uncertain terms that what I was doing wasn’t ok. I tried and tried poking and prodding in different ways before I realized that I was trying to make Rust do something it fundamentally would not let me do.</p>
+
+<p>To explain why, consider a simple Node class for a doubly-linked list:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Node</span> {
+    value: <span style="color:#66d9ef">u64</span>,
+    next: Option<span style="color:#f92672">&lt;</span>Box<span style="color:#f92672">&lt;</span>Node<span style="color:#f92672">&gt;&gt;</span>,
+    prev: Option<span style="color:#f92672">&lt;</span>Box<span style="color:#f92672">&lt;</span>Node<span style="color:#f92672">&gt;&gt;</span>,
+}</code></pre></div>
+<p>Each node has a 64-bit value, and optional <code>next</code> and <code>prev</code> nodes. Before I get into the parts of Rust that make this impossible, let me talk about the parts that make Rust awesome.</p>
+
+<ul>
+<li><code>next</code> and <code>prev</code> must be <code>Optional</code> because there is no such thing as a null pointer in Rust. As the witnesser of many a segfault, this is awesome.</li>
+<li><code>next</code> and <code>prev</code> recursively refer to <code>Node</code>, so we can’t put them directly into the struct.<sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="https://rcoh.me/posts/rust-linked-list-basically-impossible/#fn:1">1</a></sup> <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>, the simplest of Rust’s “smart pointers” will heap allocate its contents when <code>Box::new()</code> is called.</li>
+</ul>
+
+<p>So far so good. The compiler happily accepts our <code>struct</code>. The problems start if we try to actually use it.</p>
+
+<h3 id="rust-and-ownership">Rust and Ownership</h3>
+
+<p>To understand intuitively why this won’t work, we have to understand ownership. Rust’s safety features don’t come for free, and ownership is one of the costs. Rust has 3 simple rules of ownership with complex and sweeping implications:</p>
+
+<ol>
+<li>Each value in Rust has a variable that’s called its owner.</li>
+<li>There can only be one owner at a time.</li>
+<li>When the owner goes out of scope, the value will be dropped.</li>
+</ol>
+
+<p>I won’t attempt to describe these implications here – there are too many and I don’t understand most of them. The one that is important to note, however, is that if you pass a value directly to a function, the function (and the return value of the function, if there is one) now owns your value. You can’t use it anymore.</p>
+
+<p>Our first try at implementing a linked list based on the struct above will hit problems immediately.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#75715e">// must be mut so we can modify it
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> head <span style="color:#f92672">=</span> Node {
+    value: <span style="color:#ae81ff">5</span>,
+    next: None,
+    prev: None,
+};
+<span style="color:#66d9ef">let</span> next <span style="color:#f92672">=</span> Node {
+    value: <span style="color:#ae81ff">6</span>,
+    next: None,
+                 <span style="color:#75715e">// next takes ownership of head!!!
+</span><span style="color:#75715e"></span>    prev: Some(Box::new(head)),
+};
+<span style="color:#75715e">// I actually don't understand why the line below compiles. 
+</span><span style="color:#75715e">// Since `head` was moved into the box, I'm not sure why I can mutate it.
+</span><span style="color:#75715e"></span>head.next <span style="color:#f92672">=</span> Some(Box::new(next));</code></pre></div>
+<p>So far so good! But what if we want to print head:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">println<span style="color:#f92672">!</span>(<span style="color:#e6db74">"{:?}"</span>, head)</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">  <span style="color:#f92672">-</span>-&gt; <span style="color:#a6e22e">src</span><span style="color:#f92672">/</span>lib.rs:<span style="color:#ae81ff">27</span>:<span style="color:#ae81ff">26</span>
+   <span style="color:#f92672">|</span>
+<span style="color:#ae81ff">24</span> <span style="color:#f92672">|</span>             prev: Some(Box::new(head)),
+   <span style="color:#f92672">|</span>                                        <span style="color:#f92672">----</span> value moved here
+...
+<span style="color:#ae81ff">27</span> <span style="color:#f92672">|</span>         println<span style="color:#f92672">!</span>(<span style="color:#e6db74">"{:?}"</span>, head);
+   <span style="color:#f92672">|</span>                          <span style="color:#f92672">^^^^</span> value used here after <span style="color:#66d9ef">move</span>
+   <span style="color:#f92672">|</span>
+   <span style="color:#f92672">=</span> note: <span style="color:#a6e22e">move</span> occurs because <span style="color:#960050;background-color:#1e0010">`</span>head<span style="color:#960050;background-color:#1e0010">`</span> has <span style="color:#66d9ef">type</span> <span style="color:#960050;background-color:#1e0010">`</span>ll::Node<span style="color:#960050;background-color:#1e0010">`</span>, 
+     which does not implement the <span style="color:#960050;background-color:#1e0010">`</span>Copy<span style="color:#960050;background-color:#1e0010">`</span> <span style="color:#66d9ef">trait</span></code></pre></div>
+<p>Of course! We can’t use head anymore because it was moved into prev. What about printing <code>next</code>?</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">error[E0382]: <span style="color:#a6e22e">use</span> of moved value: <span style="color:#960050;background-color:#1e0010">`</span>next<span style="color:#960050;background-color:#1e0010">`</span>
+  <span style="color:#f92672">-</span>-&gt; <span style="color:#a6e22e">src</span><span style="color:#f92672">/</span>lib.rs:<span style="color:#ae81ff">27</span>:<span style="color:#ae81ff">26</span>
+   <span style="color:#f92672">|</span>
+<span style="color:#ae81ff">26</span> <span style="color:#f92672">|</span>         head.next <span style="color:#f92672">=</span> Some(Box::new(next));
+   <span style="color:#f92672">|</span>                                        <span style="color:#f92672">----</span> value moved here
+<span style="color:#ae81ff">27</span> <span style="color:#f92672">|</span>         println<span style="color:#f92672">!</span>(<span style="color:#e6db74">"{:?}"</span>, next);
+   <span style="color:#f92672">|</span>                          <span style="color:#f92672">^^^^</span> value used here after <span style="color:#66d9ef">move</span>
+   <span style="color:#f92672">|</span>
+   <span style="color:#f92672">=</span> note: <span style="color:#a6e22e">move</span> occurs because <span style="color:#960050;background-color:#1e0010">`</span>next<span style="color:#960050;background-color:#1e0010">`</span> has <span style="color:#66d9ef">type</span> <span style="color:#960050;background-color:#1e0010">`</span>ll::Node<span style="color:#960050;background-color:#1e0010">`</span>, 
+     which does not implement the <span style="color:#960050;background-color:#1e0010">`</span>Copy<span style="color:#960050;background-color:#1e0010">`</span> <span style="color:#66d9ef">trait</span></code></pre></div>
+<p>Same problem! When we set <code>head.next = next</code>, head took ownership, and we don’t have it anymore. You can try to sidestep this problem in a couple of ways:</p>
+
+<ul>
+<li><p>Making <code>Node</code> keep borrowed boxes instead of valued boxes:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">Node {
+    <span style="color:#75715e">// ...
+</span><span style="color:#75715e"></span>    next: Option<span style="color:#f92672">&lt;&amp;</span>Box<span style="color:#f92672">&lt;</span>Node<span style="color:#f92672">&gt;&gt;</span>
+}</code></pre></div>
+<p>This helps until you want to mutate them. Borrowing is like a read-write lock for mutation. You can borrow immutably in multiple places, but if you want to borrow mutably, all your immutable borrowers must return the item. This isn’t going to work since our list is composed of immutable borrows.</p></li>
+
+<li><p>Rust has <code>Rc</code>, a ref-counted pointer which seems like it could do the trick, but it prohibits mutation. This is obvious in hindsight: how could Rust let you have multiple references to something but also let you mutate them?</p></li>
+</ul>
+
+<p>There are 3 solutions I’m aware of:</p>
+
+<ul>
+<li>Use <code>RefCell</code>, a runtime-checked borrow system <del>(which still only works on nightly if you want to mutate)</del>. <code>RefCell::borrow_mut</code> allows mutable borrowing of the cell’s contents.</li>
+<li>Eschew safe Rust altogether and wade into the magical swamp of unsafe Rust. This isn’t nearly as big a deal as I initially thought – even things like <code>Vec&lt;&gt;</code> are built on unsafe Rust.<sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="https://rcoh.me/posts/rust-linked-list-basically-impossible/#fn:2">2</a></sup> While it’s not ideal, unsafe Rust is really just “normal mode” in most other programming languages.</li>
+<li>Keep pointers as indices into a <code>Vec&lt;&gt;</code> instead of pointers, using something like the <a href="https://github.com/saschagrunert/indextree">indextree crate</a></li>
+</ul>
+
+<p>If you want to follow someone’s detailed quest to write linked lists I highly recommend <a href="http://cglab.ca/~abeinges/blah/too-many-lists/book/">Learning Rust With Entirely Too Many Linked Lists</a>.</p>
+
+<h3 id="conclusion-and-takeaways">Conclusion and Takeaways</h3>
+
+<p>In hindsight and with a deeper understanding, it’s not surprising why a doubly linked list is so problematic. Each variable can only have <em>1</em> owner. If <code>prev</code> and <code>next</code> both hold pointers to a middle node, which is the owner? They can’t both be the owner. If one is the owner, another can borrow. But Rust won’t let you mutate while someone else is borrowing, so neither could actually modify the list! In general, if you have loops in your object graph you’re out of luck.</p>
+
+<p>I find a bit of solace in the fact that implementing a data structure like this in a non-garbage collected language <em>without</em> Rust is also quite tricky; you need to carefully keep track of when a node has no more references and can be freed. In the end, I gave up on Rust for this project and implemented it in Go instead. Never has coding in Go felt so effortless ;-). In the mean time, I’m getting started on my next learn-rust project, a port of my <a href="https://github.com/SumoLogic/sumoshell">Sumoshell</a> tool. Since I ran into tons of race conditions in the initial implementation, I’m hopeful that Rust will help me get it right the first time.</p>
+
+<p>Did I get something totally wrong? Please let me know, or just <a href="https://github.com/rcoh/rcoh-dot-me-v2/blob/master/content/posts/rust-linked-list-basically-impossible.md">send me a pull request!</a></p>
+
+<hr>
+
+Want to get emailed about new blog posts?
+<div class="signup-form">
+  <div>
+<form action="https://rcoh.us17.list-manage.com/subscribe/post?u=7de5db6cf5be641fb9ed11d97&amp;id=cab76ee87a" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+	<input type="email" value="" name="EMAIL" class="email" id="mce-EMAIL" placeholder="email address" required="">
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_7de5db6cf5be641fb9ed11d97_cab76ee87a" tabindex="-1" value=""></div>
+    <input type="submit" value="Subscribe" name="subscribe" onclick="trackSubscribe()" id="mc-embedded-subscribe" style="cursor: pointer">
+</form>
+</div>
+</div>
+
+I post about once every few weeks on topics like
+<a href="https://rcoh.me/tags/databases">databases</a>, <a href="https://rcoh.me/tags/language-internals">language internals</a> and <a href="https://rcoh.me/tags/algorithms">algorithms</a>, and recently, <a href="https://rcoh.me/tags/deep-learning">deep learning</a>.
+
+<hr>
+Do you want to hire me? I’m available for engagements from 1 week to a few months. <a href="https://rcoh.me/hire-me">Hire me!</a> 
+
+<div class="footnotes">
+
+<hr>
+
+<ol>
+<li id="fn:1">To stack allocate it, Rust would need to know exactly how much space it would take. Since it’s a recursive datastructure, there is no way to know!
+ <a class="footnote-return" href="https://rcoh.me/posts/rust-linked-list-basically-impossible/#fnref:1"><sup class=" has-jax"><span class="MathJax_Preview" style="color: inherit; display: none;"></span><div class="MathJax_Display" style="text-align: center;"><span class="MathJax" id="MathJax-Element-2-Frame" tabindex="0" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mi&gt;t&lt;/mi&gt;&lt;mi&gt;u&lt;/mi&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/math&gt;" role="presentation" style="text-align: center; position: relative;"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-7" style="width: 3.605em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.922em; height: 0px; font-size: 122%;"><span style="position: absolute; clip: rect(1.369em, 1002.92em, 2.363em, -999.997em); top: -2.17em; left: 0em;"><span class="mrow" id="MathJax-Span-8"><span class="mi" id="MathJax-Span-9" style="font-family: MathJax_Math-italic;">r</span><span class="mi" id="MathJax-Span-10" style="font-family: MathJax_Math-italic;">e</span><span class="mi" id="MathJax-Span-11" style="font-family: MathJax_Math-italic;">t</span><span class="mi" id="MathJax-Span-12" style="font-family: MathJax_Math-italic;">u</span><span class="mi" id="MathJax-Span-13" style="font-family: MathJax_Math-italic;">r</span><span class="mi" id="MathJax-Span-14" style="font-family: MathJax_Math-italic;">n</span></span><span style="display: inline-block; width: 0px; height: 2.176em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.072em; border-left: 0px solid; width: 0px; height: 0.913em;"></span></span></nobr><span class="MJX_Assistive_MathML MJX_Assistive_MathML_Block" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mi>r</mi><mi>e</mi><mi>t</mi><mi>u</mi><mi>r</mi><mi>n</mi></math></span></span></div><script type="math/tex; mode=display" id="MathJax-Element-2">return</script></sup></a></li>
+<li id="fn:2">Building on an unsafe foundation: <a href="https://www.youtube.com/watch?v=rTo2u13lVcQ">https://www.youtube.com/watch?v=rTo2u13lVcQ</a>
+ <a class="footnote-return" href="https://rcoh.me/posts/rust-linked-list-basically-impossible/#fnref:2"><sup class=" has-jax"><span class="MathJax_Preview" style="color: inherit; display: none;"></span><div class="MathJax_Display" style="text-align: center;"><span class="MathJax" id="MathJax-Element-3-Frame" tabindex="0" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mi&gt;t&lt;/mi&gt;&lt;mi&gt;u&lt;/mi&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/math&gt;" role="presentation" style="text-align: center; position: relative;"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-15" style="width: 3.605em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.922em; height: 0px; font-size: 122%;"><span style="position: absolute; clip: rect(1.369em, 1002.92em, 2.363em, -999.997em); top: -2.17em; left: 0em;"><span class="mrow" id="MathJax-Span-16"><span class="mi" id="MathJax-Span-17" style="font-family: MathJax_Math-italic;">r</span><span class="mi" id="MathJax-Span-18" style="font-family: MathJax_Math-italic;">e</span><span class="mi" id="MathJax-Span-19" style="font-family: MathJax_Math-italic;">t</span><span class="mi" id="MathJax-Span-20" style="font-family: MathJax_Math-italic;">u</span><span class="mi" id="MathJax-Span-21" style="font-family: MathJax_Math-italic;">r</span><span class="mi" id="MathJax-Span-22" style="font-family: MathJax_Math-italic;">n</span></span><span style="display: inline-block; width: 0px; height: 2.176em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.072em; border-left: 0px solid; width: 0px; height: 0.913em;"></span></span></nobr><span class="MJX_Assistive_MathML MJX_Assistive_MathML_Block" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mi>r</mi><mi>e</mi><mi>t</mi><mi>u</mi><mi>r</mi><mi>n</mi></math></span></span></div><script type="math/tex; mode=display" id="MathJax-Element-3">return</script></sup></a></li>
+</ol>
+</div>
+
+      </div>
+    </article>
+    <aside class="ph3 mt2 mt6-ns bg-light-gray pv3 sidebar">
+      
+
+  
+  
+  
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+  
+  
+  
+  
+  
+  
+  
+    <div>
+      <ul>
+        <li class="list b mb3">
+          9 Related Posts
+        </li>
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/thoughts-on-rust-a-few-thousand-lines-in/" class="link ph2 pv2 db black">
+                 Thoughts on Rust, a few thousand lines in
+              </a>
+            </li>
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/sudo-science/" class="link ph2 pv2 db black">
+                 Sudo Science
+              </a>
+            </li>
+          
+        
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/cache-oblivious-datastructures/" class="link ph2 pv2 db black">
+                 Maximize Cache Performance with this One Weird Trick: An Introduction to Cache-Oblivious Data Structures
+              </a>
+            </li>
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/postgres-indexes-under-the-hood/" class="link ph2 pv2 db black">
+                 Postgres Indexes Under the Hood
+              </a>
+            </li>
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/linear-time-median-finding/" class="link ph2 pv2 db black">
+                 My Favorite Algorithm: Linear Time Median Finding
+              </a>
+            </li>
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/hash-map-analysis/" class="link ph2 pv2 db black">
+                 An Analysis of Hash Map Implementations in Popular Languages
+              </a>
+            </li>
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/no-magic-regular-expressions-part-3/" class="link ph2 pv2 db black">
+                 No Magic: Regular Expressions, Part 3
+              </a>
+            </li>
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/no-magic-regular-expressions-part-2/" class="link ph2 pv2 db black">
+                 No Magic: Regular Expressions, Part 2
+              </a>
+            </li>
+          
+        
+          
+            <li class="list f5 w-100 hover-bg-white nl1">
+              <a href="https://rcoh.me/posts/no-magic-regular-expressions/" class="link ph2 pv2 db black">
+                 No Magic: Regular Expressions
+              </a>
+            </li>
+          
+        
+      </ul>
+    </div>
+  
+
+
+        
+
+<div class="flex" style="justify-content: space-evenly; flex-wrap: wrap">
+  
+  
+    
+    
+    <div class="">
+       <a class="link black ph2 pv2 hover-bg-white" href="https://rcoh.me/tags/rust">#rust</a>
+    </div>
+    
+  
+    
+    
+    <div class="">
+       <a class="link black ph2 pv2 hover-bg-white" href="https://rcoh.me/tags/algorithms">#algorithms</a>
+    </div>
+    
+  
+</div>
+
+      <div class="bg-light-gray pv3">
+        <hr class="mw3 bb bw1 b--black-60">
+      </div>
+      
+
+
+
+
+
+
+
+  <div>
+    <ul>
+      <li class="list b mb3">
+        Recent Posts
+      </li>
+      
+      
+        
+        <li class="list f5 w-100 hover-bg-white nl1">
+          
+          <a href="https://rcoh.me/posts/verifiable-voting-primer/" class="link ph2 pv2 db black">
+            Verifiable Voting: A Primer
+          </a>
+        </li>
+        
+      
+        
+        <li class="list f5 w-100 hover-bg-white nl1">
+          
+          <a href="https://rcoh.me/posts/how-to-code-review/" class="link ph2 pv2 db black">
+            How to Code Review
+          </a>
+        </li>
+        
+      
+        
+        <li class="list f5 w-100 hover-bg-white nl1">
+          
+          <a href="https://rcoh.me/posts/dropout-deep-complexity/" class="link ph2 pv2 db black">
+            Dropout and the Deep Complexity of Neural Networks
+          </a>
+        </li>
+        
+      
+        
+        <li class="list f5 w-100 hover-bg-white nl1">
+          
+          <a href="https://rcoh.me/posts/why-you-can-have-a-million-go-routines-but-only-1000-java-threads/" class="link ph2 pv2 db black">
+            Why you can have millions of Goroutines but only thousands of Java Threads
+          </a>
+        </li>
+        
+      
+        
+        <li class="list f5 w-100 hover-bg-white nl1">
+          
+          <a href="https://rcoh.me/posts/thoughts-on-rust-a-few-thousand-lines-in/" class="link ph2 pv2 db black">
+            Thoughts on Rust, a few thousand lines in
+          </a>
+        </li>
+        
+      
+    </ul>
+  </div>
+
+
+    </aside>
+  </div>
+  
+
+    </main>
+    <footer class="bg-near-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between" style="align-items: center; flex-wrap: wrap; justify-content: space-evenly">
+    <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://rcoh.me/">
+      © 2021 Russell Cohen
+    </a>
+    
+    <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://github.com/rcoh/rcoh-dot-me-v2">Source</a>
+     
+
+
+
+  <a href="https://twitter.com/russellrcohen" class="link-transition twitter link dib z-999   mr2" title="Twitter link" onclick="trackOutboundLink(&#39;twitter-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"></path></svg>
+
+  </a>
+
+
+  <a href="https://www.instagram.com/therealrussbuss/" class="link-transition instagram link dib z-999   mr2" title="Instagram link" onclick="trackOutboundLink(&#39;insta-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M42.271,26.578v-0.006c0.502,0,1.005,0.01,1.508-0.002  c0.646-0.017,1.172-0.57,1.172-1.217c0-0.963,0-1.927,0-2.89c0-0.691-0.547-1.24-1.236-1.241c-0.961,0-1.922-0.001-2.883,0  c-0.688,0.001-1.236,0.552-1.236,1.243c-0.001,0.955-0.004,1.91,0.003,2.865c0.001,0.143,0.028,0.291,0.073,0.426  c0.173,0.508,0.639,0.82,1.209,0.823C41.344,26.579,41.808,26.578,42.271,26.578z M33,27.817c-3.384-0.002-6.135,2.721-6.182,6.089  c-0.049,3.46,2.72,6.201,6.04,6.272c3.454,0.074,6.248-2.686,6.321-6.043C39.254,30.675,36.462,27.815,33,27.817z M21.046,31.116  v0.082c0,4.515-0.001,9.03,0,13.545c0,0.649,0.562,1.208,1.212,1.208c7.16,0.001,14.319,0.001,21.479,0  c0.656,0,1.215-0.557,1.215-1.212c0.001-4.509,0-9.02,0-13.528v-0.094h-2.912c0.411,1.313,0.537,2.651,0.376,4.014  c-0.161,1.363-0.601,2.631-1.316,3.803s-1.644,2.145-2.779,2.918c-2.944,2.006-6.821,2.182-9.946,0.428  c-1.579-0.885-2.819-2.12-3.685-3.713c-1.289-2.373-1.495-4.865-0.739-7.451C22.983,31.116,22.021,31.116,21.046,31.116z   M45.205,49.255c0.159-0.026,0.318-0.049,0.475-0.083c1.246-0.265,2.264-1.304,2.508-2.557c0.025-0.137,0.045-0.273,0.067-0.409  V21.794c-0.021-0.133-0.04-0.268-0.065-0.401c-0.268-1.367-1.396-2.428-2.78-2.618c-0.058-0.007-0.113-0.02-0.17-0.03H20.761  c-0.147,0.027-0.296,0.047-0.441,0.08c-1.352,0.308-2.352,1.396-2.545,2.766c-0.008,0.057-0.02,0.114-0.029,0.171V46.24  c0.028,0.154,0.05,0.311,0.085,0.465c0.299,1.322,1.427,2.347,2.77,2.52c0.064,0.008,0.13,0.021,0.195,0.03H45.205z M33,64  C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"></path></svg>
+
+  </a>
+
+
+
+  <a href="https://www.linkedin.com/in/russell-cohen-b75b9927" class="link-transition linkedin link dib z-999   mr2" title="LinkedIn link" onclick="trackOutboundLink(&#39;linkedin-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"></path>
+</svg>
+
+  </a>
+
+
+  <a href="https://github.com/rcoh" class="link-transition github link dib z-999   mr2" title="Github link" onclick="trackOutboundLink(&#39;github-navbar&#39;)">
+    <svg height="32px" style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M256,32C132.3,32,32,134.8,32,261.7c0,101.5,64.2,187.5,153.2,217.9c11.2,2.1,15.3-5,15.3-11.1   c0-5.5-0.2-19.9-0.3-39.1c-62.3,13.9-75.5-30.8-75.5-30.8c-10.2-26.5-24.9-33.6-24.9-33.6c-20.3-14.3,1.5-14,1.5-14   c22.5,1.6,34.3,23.7,34.3,23.7c20,35.1,52.4,25,65.2,19.1c2-14.8,7.8-25,14.2-30.7c-49.7-5.8-102-25.5-102-113.5   c0-25.1,8.7-45.6,23-61.6c-2.3-5.8-10-29.2,2.2-60.8c0,0,18.8-6.2,61.6,23.5c17.9-5.1,37-7.6,56.1-7.7c19,0.1,38.2,2.6,56.1,7.7   c42.8-29.7,61.5-23.5,61.5-23.5c12.2,31.6,4.5,55,2.2,60.8c14.3,16.1,23,36.6,23,61.6c0,88.2-52.4,107.6-102.3,113.3   c8,7.1,15.2,21.1,15.2,42.5c0,30.7-0.3,55.5-0.3,63c0,6.1,4,13.3,15.4,11C415.9,449.1,480,363.1,480,261.7   C480,134.8,379.7,32,256,32z"></path>
+</svg>
+
+  </a>
+
+
+    <div class="brave pt3 pt0-l">
+      <a target="_blank" href="https://brave.com/rco093">
+        <img src="./Why Writing a Linked List in (safe) Rust is So Damned Hard_files/brave.gif">
+      </a>
+    </div>
+  </div>
+  
+  <script type="text/javascript" src="./Why Writing a Linked List in (safe) Rust is So Damned Hard_files/MathJax.js">
+  </script>
+  <script type="text/x-mathjax-config;executed=true">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\[','\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        TeX: { equationNumbers: { autoNumber: "AMS" },
+             extensions: ["AMSmath.js", "AMSsymbols.js"] }
+      }
+    });
+  </script>
+  <script>
+    let updateJax = function() {
+      
+      
+      
+      var all = MathJax.Hub.getAllJax();
+      for (i = 0; i < all.length; i++) {
+        all[i].SourceElement().parentNode.className += ' has-jax'; 
+      }
+    }
+  </script>
+  
+  <script type="text/x-mathjax-config;executed=true">
+    MathJax.Hub.Queue(updateJax);
+  </script>
+  
+</footer>
+    <script src="./Why Writing a Linked List in (safe) Rust is So Damned Hard_files/app.bundle.js" async=""></script>
+
+  
+
+<div style="position: absolute; width: 0px; height: 0px; overflow: hidden; padding: 0px; border: 0px; margin: 0px;"><div id="MathJax_Font_Test" style="position: absolute; visibility: hidden; top: 0px; left: 0px; width: auto; padding: 0px; border: 0px; margin: 0px; white-space: nowrap; text-align: left; text-indent: 0px; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; font-size: 40px; font-weight: normal; font-style: normal; font-family: MathJax_Main, sans-serif;"></div></div></body></html>

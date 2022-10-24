@@ -66,16 +66,13 @@ fn f_calculate_o_object_2d(
     f_calculate_o_spatialproperty(&mut o_object_2d.o_spatialproperty__scale);
 }
 
+// #[derive(Debug)]
 struct O_graph_node<'a>{
     o_object_2d: &'a O_object_2d, 
-    // o_graph_node__up: Option<Box<&'a O_graph_node<'a>>>,
-    // o_graph_node__right: Option<Box<&'a O_graph_node<'a>>>,
-    // o_graph_node__down: Option<Box<&'a O_graph_node<'a>>>,
-    // o_graph_node__left: Option<Box<&'a O_graph_node<'a>>>,
-    a_o_graph_node__up: Vec<&'a O_graph_node<'a>>,
-    a_o_graph_node__right: Vec<&'a O_graph_node<'a>>,
-    a_o_graph_node__down: Vec<&'a O_graph_node<'a>>,
-    a_o_graph_node__left: Vec<&'a O_graph_node<'a>>,
+    n_index_a_o_graph_node__up: Option<usize>,
+    n_index_a_o_graph_node__right: Option<usize>,
+    n_index_a_o_graph_node__down: Option<usize>,
+    n_index_a_o_graph_node__left: Option<usize>,
 }
 
 
@@ -616,167 +613,182 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     let mut a_o_graph_node : Vec<O_graph_node> = Vec::new();
 
+    let mut n_x = 0.0;
+    let mut n_y = 0.0;
 
     for o_object_2d in o_game.a_o_object_2d.iter(){
         if(o_object_2d.s_name == String::from("graph_node")){
             a_o_graph_node.push(
                     O_graph_node{
                         o_object_2d: o_object_2d, 
-                        a_o_graph_node__up: vec![], 
-                        a_o_graph_node__right: vec![], 
-                        a_o_graph_node__down: vec![], 
-                        a_o_graph_node__left: vec![], 
+                        n_index_a_o_graph_node__left: None, 
+                        n_index_a_o_graph_node__up: None, 
+                        n_index_a_o_graph_node__down: None, 
+                        n_index_a_o_graph_node__right: None, 
                     }
             )
         }
     }
-
-    a_o_graph_node[0].a_o_graph_node__down.push(&a_o_graph_node[1]);
-    // std::vec::Vec<O_graph_node>
-    // let mut a_o_graph_node : Vec<O_graph_node> = Vec::new();
-    // cannot borrow `a_o_graph_node` as immutable because it is also borrowed as mutable
-
-    // immutable borrow occurs hererustc(E0502)
-    // main.rs(634, 5): mutable borrow occurs here
-    // main.rs(634, 44): mutable borrow later used by call
-    // main.rs(634, 50): immutable borrow occurs here
-    // let mut n_index_a_o_graph_node_1 = 0;
-    // while(n_index_a_o_graph_node_1 < a_o_graph_node.len()){
+    println!("here");
+    let mut n_index_a_o_graph_node__origin = 0; 
+    let n_length_a_o_graph_node = a_o_graph_node.len();
+    while(n_index_a_o_graph_node__origin < n_length_a_o_graph_node){
         
+        // left
+        let n_x =
+            a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x
+            - o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x;
+        let n_y = 
+            a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y
+            ;
+        let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
+            &o_game.a_o_object_2d, 
+            n_x, 
+            n_y,
+            String::from("graph_node")
+        );
+        println!("a_o_object_2d__found.len(), {:?}", a_o_object_2d__found.len());
+        // println!("a_o_object_2d__found[0].s_name, {:?}", a_o_object_2d__found[0].s_name);
+        if(a_o_object_2d__found.len() > 0){
+            let o_object_2d_found = a_o_object_2d__found.remove(0);
+            let mut n_index_a_o_graph_node = 0;
+            while(n_index_a_o_graph_node < n_length_a_o_graph_node){
+                let o_g = &a_o_graph_node[n_index_a_o_graph_node]; 
+                // let n_x = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
+                // let n_y = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
 
-    //     let mut n_x = 0.0;
-    //     let mut n_y = 0.0;
+                if(
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_x 
+                    && 
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_y 
+                ){
+                    a_o_graph_node[n_index_a_o_graph_node__origin].n_index_a_o_graph_node__left = Some(n_index_a_o_graph_node); 
+                }
+                n_index_a_o_graph_node+=1;
+                
+            }
+        }
+
+        // up
+        let n_x =
+            a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x
+            ;
+        let n_y = 
+            a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y
+            - o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y;
+        let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
+            &o_game.a_o_object_2d, 
+            n_x, 
+            n_y,
+            String::from("graph_node")
+        );
+        if(a_o_object_2d__found.len() > 0){
+            let o_object_2d_found = a_o_object_2d__found.remove(0);
+            let mut n_index_a_o_graph_node = 0;
+            while(n_index_a_o_graph_node < n_length_a_o_graph_node){
+                let o_g = &a_o_graph_node[n_index_a_o_graph_node]; 
+                // let n_x = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
+                // let n_y = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
+
+                if(
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_x 
+                    && 
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_y 
+                ){
+                    a_o_graph_node[n_index_a_o_graph_node__origin].n_index_a_o_graph_node__up = Some(n_index_a_o_graph_node); 
+                }
+                n_index_a_o_graph_node+=1;
+                
+            }
+        }
+
+        // down
+        let n_x =
+            a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x
+            ;
+        let n_y = 
+            a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y
+            + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y;
+        let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
+            &o_game.a_o_object_2d, 
+            n_x, 
+            n_y,
+            String::from("graph_node")
+        );
+        if(a_o_object_2d__found.len() > 0){
+            let o_object_2d_found = a_o_object_2d__found.remove(0);
+            let mut n_index_a_o_graph_node = 0;
+            while(n_index_a_o_graph_node < n_length_a_o_graph_node){
+                let o_g = &a_o_graph_node[n_index_a_o_graph_node]; 
+                // let n_x = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
+                // let n_y = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
+
+                if(
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_x 
+                    && 
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_y 
+                ){
+                    a_o_graph_node[n_index_a_o_graph_node__origin].n_index_a_o_graph_node__down = Some(n_index_a_o_graph_node); 
+                }
+                n_index_a_o_graph_node+=1;
+                
+            }
+        }
+    // right
+        let n_x =
+        a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x
+        + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x;
+        let n_y = 
+            a_o_graph_node[n_index_a_o_graph_node__origin].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y
+            ;
+        let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
+            &o_game.a_o_object_2d, 
+            n_x, 
+            n_y,
+            String::from("graph_node")
+        );
+        if(a_o_object_2d__found.len() > 0){
+            let o_object_2d_found = a_o_object_2d__found.remove(0);
+            let mut n_index_a_o_graph_node = 0;
+            while(n_index_a_o_graph_node < n_length_a_o_graph_node){
+                let o_g = &a_o_graph_node[n_index_a_o_graph_node]; 
+                // let n_x = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
+                // let n_y = a_o_graph_node[n_index_a_o_graph_node].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
+
+                if(
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_x 
+                    && 
+                    o_g.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
+                    o_object_2d_found.o_spatialproperty__translation.o_point_2d__current.n_y 
+                ){
+                    a_o_graph_node[n_index_a_o_graph_node__origin].n_index_a_o_graph_node__right = Some(n_index_a_o_graph_node); 
+                }
+                n_index_a_o_graph_node+=1;
+                
+            }
+        }
 
 
+        n_index_a_o_graph_node__origin+=1;
 
-    //     let len = a_o_graph_node.len();
+    }
 
-    //     let mut n_index_a_o_graph_node = 0; 
-        
-    //     let mut n_index_a_o_graph_node_to_push: Option<usize> = None;
-    //     while(n_index_a_o_graph_node < len){
-    //         let o_graph_node_inner = &a_o_graph_node[n_index_a_o_graph_node];
-    //         if(
-    //             o_graph_node_inner.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
-    //             a_o_graph_node[n_index_a_o_graph_node_1].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x 
-    //             && 
-    //             o_graph_node_inner.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y == 
-    //             a_o_graph_node[n_index_a_o_graph_node_1].o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y 
-    //         ){
-    //             n_index_a_o_graph_node_to_push = Some(n_index_a_o_graph_node);
-    //         }
-    //         n_index_a_o_graph_node+=1;
-    //     }
-    //     if(n_index_a_o_graph_node_to_push.is_some()){
-    //         &mut a_o_graph_node[n_index_a_o_graph_node_1].a_o_graph_node__up.push(&a_o_graph_node[n_index_a_o_graph_node_to_push.unwrap()])
-    //     }
+    for o_graph_node in a_o_graph_node.iter(){
+        println!("----");
+        println!("o_graph_node.n_index_a_o_graph_node__right {:?}", o_graph_node.n_index_a_o_graph_node__right);
+        println!("o_graph_node.n_index_a_o_graph_node__down {:?}", o_graph_node.n_index_a_o_graph_node__down);
+        println!("o_graph_node.n_index_a_o_graph_node__up {:?}", o_graph_node.n_index_a_o_graph_node__up);
+        println!("o_graph_node.n_index_a_o_graph_node__left {:?}", o_graph_node.n_index_a_o_graph_node__left);
+    }
 
-    //     // up
-    //     // n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
-    //     // n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y - o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y;
-    //     // let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
-    //     //     &o_game.a_o_object_2d, 
-    //     //     n_x, 
-    //     //     n_y, 
-    //     //     String::from("graph_node")
-    //     // );
-    //     // if(a_o_object_2d__found.len() == 1){
-    //     //     let mut n_index_a_o_graph_node = 0; 
-    //     //     while(n_index_a_o_graph_node < a_o_graph_node.len()){
-    //     //         let o_graph_node = &a_o_graph_node[n_index_a_o_graph_node];
-    //     //         if(
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x 
-    //     //             && 
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y 
-    //     //         ){
-    //     //             o_graph_node_origin.o_graph_node__up = Some(Box::new(o_graph_node))
-    //     //         }
-    //     //         n_index_a_o_graph_node+=1;
-    //     //     }
-    //     // }
-    //     // //right
-    //     // n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x;
-    //     // n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
-    //     // let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
-    //     //     &o_game.a_o_object_2d, 
-    //     //     n_x, 
-    //     //     n_y, 
-    //     //     String::from("graph_node")
-    //     // );
-    //     // if(a_o_object_2d__found.len() == 1){
-    //     //     let mut n_index_a_o_graph_node = 0; 
-    //     //     while(n_index_a_o_graph_node < a_o_graph_node.len()){
-    //     //         let o_graph_node = &a_o_graph_node[n_index_a_o_graph_node];
-    //     //         if(
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x 
-    //     //             && 
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y 
-    //     //         ){
-    //     //             o_graph_node_origin.o_graph_node__right = Some(Box::new(o_graph_node))
-    //     //         }
-    //     //         n_index_a_o_graph_node+=1;
-    //     //     }
-    //     // }
-    //     // //down
-    //     // n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x;
-    //     // n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y + o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_y;
-    //     // let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
-    //     //     &o_game.a_o_object_2d, 
-    //     //     n_x, 
-    //     //     n_y, 
-    //     //     String::from("graph_node")
-    //     // );
-    //     // if(a_o_object_2d__found.len() == 1){
-    //     //     let mut n_index_a_o_graph_node = 0; 
-    //     //     while(n_index_a_o_graph_node < a_o_graph_node.len()){
-    //     //         let o_graph_node = &a_o_graph_node[n_index_a_o_graph_node];
-    //     //         if(
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x 
-    //     //             && 
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y 
-    //     //         ){
-    //     //             o_graph_node_origin.o_graph_node__down = Some(Box::new(o_graph_node))
-    //     //         }
-    //     //         n_index_a_o_graph_node+=1;
-    //     //     }
-    //     // }
-    //     // //left
-    //     // n_x = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x - o_game.o_object_2d_box.o_spatialproperty__scale.o_point_2d__current.n_x;
-    //     // n_y = o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y;
-    //     // let mut a_o_object_2d__found = f_a_o_object_2d_by_x_y_name(
-    //     //     &o_game.a_o_object_2d, 
-    //     //     n_x, 
-    //     //     n_y, 
-    //     //     String::from("graph_node")
-    //     // );
-    //     // if(a_o_object_2d__found.len() == 1){
-    //     //     let mut n_index_a_o_graph_node = 0; 
-    //     //     while(n_index_a_o_graph_node < a_o_graph_node.len()){
-    //     //         let o_graph_node = &a_o_graph_node[n_index_a_o_graph_node];
-    //     //         if(
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_x 
-    //     //             && 
-    //     //             o_graph_node.o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y == 
-    //     //             o_object_2d.o_spatialproperty__translation.o_point_2d__current.n_y 
-    //     //         ){
-    //     //             o_graph_node_origin.o_graph_node__left = Some(Box::new(o_graph_node))
-    //     //         }
-    //     //         n_index_a_o_graph_node+=1;
-    //     //     }
-    //     // }
-
-    //     n_index_a_o_graph_node_1+=1;
-    // }
-
-
-
+    // std::process::exit(1);
     let mut o_object_2d_player = O_object_2d{
         s_name: String::from("player"),
         o_spatialproperty__translation: O_spatialproperty{
@@ -864,6 +876,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ]
         }
     };
+    
     let n_index_o_object_2d_target = o_game.a_o_object_2d.len();
     o_game.a_o_object_2d.push(o_object_2d_target);
 
@@ -1038,6 +1051,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   Ok(())
 }
+
 
 
 // fn f_o_graph_node_by_o_object_2d<'a>(
