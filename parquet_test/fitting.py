@@ -38,6 +38,8 @@ def ML_theo_for_array(a_t, umin, tE, I, t_max):
 
 def fit(f_theo=function, a_x_t=array, a_y_mag=array):  # returns number: optimal difference
     a_differences = []
+    hmjd
+            mag
 
     # Limits (numbers) - parameters beyond these are not sensible
 
@@ -47,10 +49,6 @@ def fit(f_theo=function, a_x_t=array, a_y_mag=array):  # returns number: optimal
     min_tE = 1
     max_tE = int(max_mag) - int(min_mag)
 
-    # umin has to be between 0 and 1 but range doesn't work for floats - make list of ints and divide agai
-    n_index = 1
-    while(n_index < 100):
-        umin = 0.01*n_index
 
     for umin in [0.01*x for x in range(1, 100)]:
         for tE in range(min_tE, max_tE):
